@@ -137,6 +137,8 @@ private:
 	}
 
 public:
+	static Integer default_mod_;
+
 	Integer getModValue(const Integer& n) const
 	{
 		return (n % mod_ + mod_) % mod_;
@@ -153,6 +155,8 @@ public:
 		return getModValue(sol.first);
 	}
 
+	ResidueInteger() : mod_(default_mod_), n_(getModValue(0)) {}
+	ResidueInteger(Integer n) : mod_(default_mod_), n_(getModValue(n)) {}
 	ResidueInteger(Integer n, Integer mod) : mod_(mod), n_(getModValue(n)) {}
 
 	inline ResidueInteger operator+(const ResidueInteger& rhs) const
@@ -305,63 +309,19 @@ public:
 		return lhs;
 	}
 };
-
-template<class Integer>
-class ResidueIntegerFactory
-{
-private:
-	ll mod_;
-	ResidueIntegerFactory(ll mod) : mod_(mod) {}
-public:
-	ResidueInteger<Integer> create(ll n)
-	{
-		return ResidueInteger<Integer>(n, mod_);
-	}
-};
 using rll = ResidueInteger<ll>;
-using rll_factory = ResidueIntegerFactory<ll>;
+template<> ll rll::default_mod_ = 1000000007LL;
 
-//template<class Integer>
-//class ResidueCombinatorialCalculator
-//{
-//private:
-//	Integer mod_;
-//	Integer n_;
-//	map<Integer, ResidueInteger<Integer>> values_;
-//public:
-//	ResidueCombinatorialCalculator(Integer n, Integer mod) : mod_(mod), n_(n)
-//	{
-//		values_[0] = ResidueInteger<Integer>(1, mod_);
-//	}
-//	
-//	ResidueInteger<Integer> calculate(Integer r)
-//	{
-//		if (r < 0 || n_ < r)
-//		{
-//			return 0;
-//		}
-//
-//		if (values_.count(r) >= 1)
-//		{
-//			return values_[r];
-//		}
-//		if (values_.count(n_ - r) >= 1)
-//		{
-//			values_[r] = values_[n_ - r];
-//			return values_[r];
-//		}
-//		if (n_ < r * 2)
-//		{
-//			values_[r] = calculate(n_ - r);
-//			return values_[r];
-//		}
-//
-//		values_[r] = calculate(r - 1) * (n_ - r + 1) / r;
-//
-//		return values_[r];
-//	}
-//};
-//using rccll = ResidueCombinatorialCalculator<ll>;
+rll mod_comb(ll n, ll r, ll mod) {
+	rll res(1LL);
+	for (ll i = 0; i < r; ++i)
+	{
+		res *= n - i;
+		res /= i + 1LL;
+	}
+
+	return res;
+}
 
 template <class Integer>
 class Matrix

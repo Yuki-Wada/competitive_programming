@@ -241,47 +241,6 @@ public:
 using rll = ResidueInteger<ll>;
 template<> ll rll::default_mod_ = 1000000007LL;
 
-class ResidueCombinatorialCalculator
-{
-private:
-	ll mod_;
-	ll n_;
-	map<ll, ResidueInteger<ll>> values_;
-public:
-	ResidueCombinatorialCalculator(ll n, ll mod) : mod_(mod), n_(n)
-	{
-		values_[0LL] = ResidueInteger<ll>(1LL, mod);
-	}
-
-	ResidueInteger<ll> calculate(ll r)
-	{
-		if (r < 0 || n_ < r)
-		{
-			return ResidueInteger<ll>(0LL, mod_);
-		}
-
-		if (values_.count(r) >= 1)
-		{
-			return values_[r];
-		}
-		if (values_.count(n_ - r) >= 1)
-		{
-			values_[r] = values_[n_ - r];
-			return values_[r];
-		}
-		if (n_ < r * 2)
-		{
-			values_[r] = calculate(n_ - r);
-			return values_[r];
-		}
-
-		values_[r] = calculate(r - 1) * (n_ - r + 1) / r;
-
-		return values_[r];
-	}
-};
-using rccll = ResidueCombinatorialCalculator;
-
 rll calc(ll r, ll c) {
 	rll res(1LL);
 	for (ll i = 0; i < c + 1; ++i)
