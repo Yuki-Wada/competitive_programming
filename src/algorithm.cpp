@@ -312,7 +312,7 @@ public:
 using rll = ResidueInteger<ll>;
 template<> ll rll::default_mod_ = 1000000007LL;
 
-rll mod_comb(ll n, ll r, ll mod) {
+rll mod_comb(ll n, ll r) {
 	rll res(1LL);
 	for (ll i = 0; i < r; ++i)
 	{
@@ -562,6 +562,51 @@ vector<ll> z_algorithm(string S) {
 	As[0] = S.size();
 
 	return As;
+}
+
+ll boyer_moore_algorithm(const vector<ll>& pattern, const vector<ll>& str) {
+	map<ll, ll> shift;
+	ll pattern_idx;
+	for (ll i = 0; i < pattern.size(); ++i) {
+		pattern_idx = pattern.size() - 1 - i;
+		if (shift.count(shift[pattern[pattern_idx]]) == 0) {
+			shift[pattern[pattern_idx]] = i;
+		}
+	}
+
+	ll base_idx = pattern.size() - 1;
+	ll curr_idx = base_idx;
+	bool found = false;
+	while (base_idx < str.size()) {
+		for (ll i = 0; i < pattern.size(); ++i) {
+			curr_idx = base_idx - i;
+			pattern_idx = pattern.size() - 1 - i;
+
+			if (pattern[pattern_idx] != str[curr_idx]) {
+				if (shift.count(str[curr_idx]) == 0) {
+					curr_idx += pattern.size();
+				}
+				else {
+					curr_idx += shift[str[curr_idx]];
+				}
+				if (base_idx >= curr_idx) {
+					++base_idx;
+				}
+				else {
+					base_idx = curr_idx;
+				}
+				break;
+			}
+			if (i + 1 == pattern.size()) {
+				found = true;
+			}
+		}
+		if (found) {
+			return curr_idx;
+		}
+	}
+
+	return -1;
 }
 
 struct ShakutoriManager
