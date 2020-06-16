@@ -609,6 +609,29 @@ ll boyer_moore_algorithm(const vector<ll>& pattern, const vector<ll>& str) {
 	return -1;
 }
 
+bool visit(ll node, const vector<vector<ll>>& edges, vector<ll>& status, vector<ll>& result) {
+	if (status[node] == 1) return true;
+	if (status[node] == 0) {
+		status[node] = 1;
+		for (ll i = 0; i < edges[node].size(); ++i) {
+			if (visit(edges[node][i], edges, status, result)) return false;
+		}
+		status[node] = 2;
+		result.emplace_back(node);
+	}
+
+	return true;
+}
+
+bool topological_sort(const vector<vector<ll>>& edges, vector<ll>& result) {
+	vector<ll> status(edges.size());
+	for (ll i = 0; i < edges.size(); ++i) {
+		if (status[i] == 0 && !visit(i, edges, status, result)) return false;
+	}
+	reverse(result.begin(), result.end());
+	return true;
+}
+
 struct ShakutoriManager
 {
 	// ó‘Ô‚ð•Û‘¶‚·‚é‚½‚ß‚Ì•Ï”‚ð’è‹`

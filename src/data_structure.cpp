@@ -169,8 +169,8 @@ private:
 		}
 
 		return func(
-			_query(start, end, searchStart, (searchStart + searchEnd) / 2, node * 2 * 1),
-			_query(start, end, (searchStart + searchEnd) / 2, searchEnd, node * 2 * 2)
+			_query(start, end, searchStart, (searchStart + searchEnd) / 2, node * 2 + 1),
+			_query(start, end, (searchStart + searchEnd) / 2, searchEnd, node * 2 + 2)
 		);
 	}
 
@@ -205,9 +205,9 @@ public:
 		{
 			throw invalid_argument("Start should be non-negative.");
 		}
-		if (maxSize_ <= end)
+		if (maxSize_ < end)
 		{
-			throw invalid_argument("End should be less than maxSize.");
+			throw invalid_argument("End should be less than or equal to maxSize.");
 		}
 		if (start >= end)
 		{

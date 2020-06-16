@@ -4,8 +4,8 @@ import math
 def get_args():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--mode', default='adjusted_value')
-    parser.add_argument('--scores', nargs='+', type=float, default=[1199, 1546, 2197])
+    parser.add_argument('--mode', default='adjusted_score')
+    parser.add_argument('--scores', nargs='+', type=float, default=[1199, 1546, 2197, 1857])
     parser.add_argument('--target_rate', type=float, default=1600)
     parser.add_argument('--participation_count', type=int, default=3)
 

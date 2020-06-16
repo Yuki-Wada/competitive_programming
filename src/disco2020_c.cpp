@@ -53,65 +53,64 @@ int solve() {
 	ll H, W, K;
 	cin >> H >> W >> K;
 
-	ll x1, y1, x2, y2;
-	cin >> x1 >> y1 >> x2 >> y2;
-	--x1, --y1, --x2, --y2;
-
-	vector<string> cs(H);
+	vector<string> Ss(H);
 	for (ll i = 0; i < H; ++i) {
-		cin >> cs[i];
+		cin >> Ss[i];
 	}
 
 	vector<vector<ll>> res(H, vector<ll>(W, -1));
-	vector<vector<bool>> que_popped(H, vector<bool>(W, false));
-
-	queue<pair<ll, ll>> que;
-	que.emplace(x2, y2);
-	res[x2][y2] = 0;
-	ll x, y;
-	while (!que.empty()) {
-		tie(x, y) = que.front();
-		que.pop();
-		que_popped[x][y] = true;
-		for (ll i = 1; i <= K; ++i) {
-			if (x - i < 0) break;
-			if (cs[x - i][y] == '@') break;
-			if (que_popped[x - i][y]) break;
-			if (res[x - i][y] == -1) {
-				que.emplace(x - i, y);
-				res[x - i][y] = res[x][y] + 1;
+	ll first_cake_row = -1;
+	ll area_name = 0LL;
+	for (ll i = 0; i < H; ++i) {
+		bool cake_found = false;
+		for (ll j = 0; j < W; ++j) {
+			if (Ss[i][j] == '#') {
+				cake_found = true;
+				break;
 			}
 		}
-		for (ll i = 1; i <= K; ++i) {
-			if (x + i >= H) break;
-			if (cs[x + i][y] == '@') break;
-			if (que_popped[x + i][y]) break;
-			if (res[x + i][y] == -1) {
-				que.emplace(x + i, y);
-				res[x + i][y] = res[x][y] + 1;
+		if (!cake_found) {
+			if (first_cake_row != -1) {
+				for (ll j = 0; j < W; ++j) {
+					res[i][j] = res[i - 1][j];
+				}
 			}
 		}
-		for (ll i = 1; i <= K; ++i) {
-			if (y - i < 0) break;
-			if (cs[x][y - i] == '@') break;
-			if (que_popped[x][y - i]) break;
-			if (res[x][y - i] == -1) {
-				que.emplace(x, y - i);
-				res[x][y - i] = res[x][y] + 1;
+		else {
+			if (first_cake_row == -1) {
+				first_cake_row = i;
 			}
-		}
-		for (ll i = 1; i <= K; ++i) {
-			if (y + i >= W) break;
-			if (cs[x][y + i] == '@') break;
-			if (que_popped[x][y + i]) break;
-			if (res[x][y + i] == -1) {
-				que.emplace(x, y + i);
-				res[x][y + i] = res[x][y] + 1;
+			++area_name;
+			bool first_cake_found = false;
+			for (ll j = 0; j < W; ++j) {
+				if (Ss[i][j] == '#') {
+					if (!first_cake_found) {
+						first_cake_found = true;
+					}
+					else {
+						++area_name;
+					}
+				}
+				res[i][j] = area_name;
 			}
 		}
 	}
 
-	cout << res[x1][y1] << endl;
+	for (ll i = first_cake_row - 1; i >= 0; --i) {
+		for (ll j = 0; j < W; ++j) {
+			res[i][j] = res[i + 1][j];
+		}
+	}
+
+	for (ll i = 0; i < H; ++i) {
+		for (ll j = 0; j < W; ++j) {
+			cout << res[i][j];
+			if (j + 1LL < W) {
+				cout << " ";
+			}
+		}
+		cout << endl;
+	}
 
 	return 0;
 }

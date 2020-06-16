@@ -1,1 +1,1 @@
-python calc_rate.py --mode adjusted_score --scores 1197 1546 2197 2000 2500
+python calc_rate.py --mode next_score --scores 1197 1546 2197 1816 1685 1972 1522 1857 2117 --target_rate 2000
