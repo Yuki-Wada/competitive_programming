@@ -4,10 +4,10 @@ def solve():
     A, B, X = map(int, input().split())
     
     if A * 10 ** 9 + B * 10 <= X:
-        print(10 ** 9)
+        res = 10 ** 9
 
     elif A + B > X:
-        print(0)
+        res = 0
 
     else:
         N = 10 ** 9
@@ -16,8 +16,10 @@ def solve():
         while A * N + B * d > X:
             N //= 10
             d = len(str(N))
+        
+        res = min((X - B * d) // A, N * 10 - 1)
 
-        print((X - B * d) // A)
+    print(res)
 
 if __name__ == '__main__':
     solve()
