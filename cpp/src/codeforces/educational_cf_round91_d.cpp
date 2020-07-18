@@ -36,8 +36,8 @@ using ull = unsigned long long;
 using comp = complex<double>;
 
 // constant
-static const ll MOD = 1000000007LL;
-static const double PI = 3.14159265358979323846;
+const ll MOD = 1000000007LL;
+const double PI = 3.14159265358979323846;
 
 // conversion
 inline ll toint(string s) { ll v; istringstream sin(s); sin >> v; return v; }
@@ -85,7 +85,6 @@ int solve() {
 	REPD(i, 0, n) cin >> as[i];
 	REPD(i, 0, m) cin >> bs[i];
 
-	cout << MOD;
 	ll res = 0, mana;
 	ll prev_a_idx = -1, a_idx = 0;
 	ll b_idx = 0;

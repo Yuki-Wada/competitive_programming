@@ -42,9 +42,161 @@ const double PI = 3.14159265358979323846;
 inline int toint(string s) { int v; istringstream sin(s); sin >> v; return v; }
 template<class t> inline string tostring(t x) { ostringstream sout; sout << x; return sout.str(); }
 
+// for loop
+#define REP(i, n) for (ll i = 0;(i) < (ll)(n);(i)++)
+
 //debug
 #define DUMP(x)  cerr << #x << " = " << (x) << endl
 #define DEBUG(x) cerr << #x << " = " << (x) << " (l" << __line__ << ")" << " " << __file__ << endl
+
+int solve() {
+	ll n;
+	cin >> n;
+
+	vector<ll> ss(n);
+	vector<vector<ll>> us(n, vector<ll>(64));
+	vector<ll> ts(n);
+	vector<vector<ll>> vs(n, vector<ll>(64));
+
+	{
+		ull u, v;
+		REP(i, n) cin >> ss[i];
+		REP(i, n) cin >> ts[i];
+		REP(i, n) {
+			cin >> u;
+			REP(bit, 64) us[i][bit] = (u >> bit) & 1LL;
+		}
+		REP(i, n) {
+			cin >> v;
+			REP(bit, 64) vs[i][bit] = (v >> bit) & 1LL;
+		}
+	}
+
+	vector<vector<ull>> matrix(n, vector<ull>(n));
+	vector<vector<ll>> bit_matrix(n, vector<ll>(n));
+	REP(bit, 64) {
+		REP(row, n) REP(col, n) {
+			bit_matrix[row][col] = 0LL;
+		}
+
+		REP(row, n) {
+			ll s = ss[row];
+			ll u = us[row][bit];
+			if (s == 0LL && u == 1LL) REP(col, n) bit_matrix[row][col] = u;
+			if (s == 1LL && u == 0LL) REP(col, n) bit_matrix[row][col] = u;
+		}
+		REP(col, n) {
+			ll t = ts[col];
+			ll v = vs[col][bit];
+			if (t == 0LL && v == 1LL) REP(row, n) bit_matrix[row][col] = v;
+			if (t == 1LL && v == 0LL) REP(row, n) bit_matrix[row][col] = v;
+		}
+
+		vector<ll> row_zero_counts(n);
+		vector<ll> column_zero_counts(n);
+		REP(row, n) REP(col, n) {
+			ll u = us[row][bit];
+			ll v = vs[col][bit];
+			if (u == v) bit_matrix[row][col] = u;
+		}
+
+		REP(row, n) REP(col, n) {
+			if (bit_matrix[row][col] == 0LL) {
+				++row_zero_counts[row];
+				++column_zero_counts[col];
+			}
+		}
+
+		REP(row, n) {
+			ll s = ss[row];
+			ll u = us[row][bit];
+			if (s == 1LL && u == 1LL && row_zero_counts[row] == n) {
+				REP(col, n) {
+					ll t = ts[col];
+					ll v = vs[col][bit];
+					if (t == 0LL && v == 0LL && column_zero_counts[col] > 1LL) {
+						bit_matrix[row][col] = 1LL;
+						--row_zero_counts[row];
+						--column_zero_counts[col];
+						break;
+					}
+				}
+			}
+		}
+
+		REP(col, n) {
+			ll t = ts[col];
+			ll v = vs[col][bit];
+			if (t == 1LL && v == 1LL && column_zero_counts[col] == n) {
+				REP(row, n) {
+					ll s = ss[row];
+					ll u = us[row][bit];
+					if (s == 0LL && u == 0LL && row_zero_counts[row] > 1LL) {
+						bit_matrix[row][col] = 1LL;
+						--row_zero_counts[row];
+						--column_zero_counts[col];
+						break;
+					}
+				}
+			}
+		}
+
+		REP(row, n) {
+			ll s = ss[row];
+			ll u = us[row][bit];
+			if (s == 0) {
+				ll prod = 1;
+				REP(col, n) prod &= bit_matrix[row][col];
+				if (prod != u) {
+					cout << -1 << endl;
+					return 0;
+				}
+			}
+			if (s == 1) {
+				ll sum = 0;
+				REP(col, n) sum |= bit_matrix[row][col];
+				if (sum != u) {
+					cout << -1 << endl;
+					return 0;
+				}
+			}
+		}
+		REP(col, n) {
+			ll t = ts[col];
+			ll v = vs[col][bit];
+			if (t == 0) {
+				ll prod = 1;
+				REP(row, n) prod &= bit_matrix[row][col];
+				if (prod != v) {
+					cout << -1 << endl;
+					return 0;
+				}
+			}
+			if (t == 1) {
+				ll sum = 0;
+				REP(row, n) sum |= bit_matrix[row][col];
+				if (sum != v) {
+					cout << -1 << endl;
+					return 0;
+				}
+			}
+		}
+
+		REP(row, n) REP(col, n) {
+			matrix[row][col] ^= ull(ull(bit_matrix[row][col]) << bit);
+		}
+	}
+
+	REP(row, n) {
+		REP(col, n) {
+			cout << matrix[row][col];
+			if (col + 1 < n) cout << " ";
+		}
+		cout << endl;
+	}
+
+	return 0;
+}
 
 //main function
 int main()
@@ -52,55 +204,7 @@ int main()
 	cin.tie(0);
 	ios::sync_with_stdio(false);
 
-	ll N;
-
-	vector<vector<ll>> data(N, vector<ll>(4));
-	ll s, t, u, v;
-	for (ll i = 0; i < N; ++i) {
-		cin >> s >> t >> u >> v;
-		data[i][0] = s;
-		data[i][1] = t;
-		data[i][2] = u;
-		data[i][3] = v;
-	}
-
-	bool has_prod_1_row, has_sum_0_row, has_prod_1_column, has_sum_0_column;
-	vector<vector<ll>> as(N, vector<ll>(N));
-	for (ll bit = 0; bit < 64; ++bit) {
-		has_prod_1_row = false;
-		has_sum_0_row = false;
-		has_prod_1_column = false;
-		has_sum_0_column = false;
-		for (ll i = 0; i < N; ++i) {
-			if (data[i][0] == 0 && ((data[i][2] >> bit) & 1LL) == 1LL) {
-				has_prod_1_row = true;
-			}
-			if (data[i][0] == 1 && ((data[i][2] >> bit) & 1LL) == 0LL) {
-				has_sum_0_row = true;
-			}
-			if (data[i][1] == 0 && ((data[i][3] >> bit) & 1LL) == 1LL) {
-				has_prod_1_column = true;
-			}
-			if (data[i][1] == 1 && ((data[i][3] >> bit) & 1LL) == 0LL) {
-				has_sum_0_column = true;
-			}
-		}
-
-		if (has_prod_1_row && has_sum_0_column) {
-			cout << -1 << endl;
-			return 0;
-		}
-		if (has_prod_1_column && has_sum_0_row) {
-			cout << -1 << endl;
-			return 0;
-		}
-	}
-
-	for (ll i = 0; i < N; ++i) {
-		for (ll j = 0; j < N; ++j) {
-			cout << as[i][j] << endl;
-		}
-	}
+	solve();
 
 	return 0;
 }

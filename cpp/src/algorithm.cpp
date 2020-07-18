@@ -34,7 +34,7 @@ using ll = long long;
 using ull = unsigned long long;
 using comp = complex<double>;
 
-const double PI = 3.14159265358979323846;
+static const double PI = 3.14;
 
 inline ll floor(ll a, ull b)
 {
@@ -85,9 +85,9 @@ inline bool is_power2(ull a)
 	return !(a & (a - 1));
 }
 
-inline ll get_specified_bit(ll a, unsigned bit)
+inline ull get_specified_bit(ull a, ull bit)
 {
-	return (a & (1LL << bit)) >> bit;
+	return (a >> bit) & 1LL;
 }
 
 // computational complexity: o(log(max(a, b))) 
@@ -115,212 +115,6 @@ inline Integer get_power(Integer base, ull exponential)
 	}
 
 	return result;
-}
-
-template <class Integer>
-class ResidueInteger
-{
-private:
-	Integer mod_;
-	Integer n_;
-	static Integer global_mod_;
-
-	// computational complexity: o(log(max(a, b))) 
-	static inline pair<Integer, Integer> getBezoutsIdentitySolution(Integer a, Integer b)
-	{
-		if (b == 0)
-		{
-			return { 1, 0 };
-		}
-		auto sol = getBezoutsIdentitySolution(b, a % b);
-		return { sol.second, sol.first - (a / b) * sol.second };
-	}
-
-public:
-	static Integer default_mod_;
-
-	Integer getModValue(const Integer& n) const
-	{
-		return (n % mod_ + mod_) % mod_;
-	}
-
-	// computational complexity: o(log(max(n, mod))) 
-	inline Integer getModInverse(const Integer& n) const
-	{
-		auto sol = getBezoutsIdentitySolution(n, mod_);
-		if (n * sol.first + mod_ * sol.second != 1)
-		{
-			return -1;
-		}
-		return getModValue(sol.first);
-	}
-
-	ResidueInteger() : mod_(default_mod_), n_(getModValue(0)) {}
-	ResidueInteger(Integer n) : mod_(default_mod_), n_(getModValue(n)) {}
-	ResidueInteger(Integer n, Integer mod) : mod_(mod), n_(getModValue(n)) {}
-
-	inline ResidueInteger operator+(const ResidueInteger& rhs) const
-	{
-		if (this->mod_ != rhs.mod_)
-		{
-			throw invalid_argument("The mods of both operands should be equal.");
-		}
-		return { this->n_ + rhs.n_, this->mod_ };
-	}
-	inline ResidueInteger operator+(const Integer& rhs) const
-	{
-		return { this->n_ + getModValue(rhs), this->mod_ };
-	}
-	friend inline ResidueInteger operator+(const Integer& lhs, const ResidueInteger& rhs)
-	{
-		return { rhs.getModValue(lhs) + rhs.n_, rhs.mod_ };
-	}
-	inline ResidueInteger& operator+=(const ResidueInteger& rhs)
-	{
-		if (this->mod_ != rhs.mod_)
-		{
-			throw invalid_argument("The mods of both operands should be equal.");
-		}
-		this->n_ = getModValue(this->n_ + rhs.n_);
-		return *this;
-	}
-	inline ResidueInteger& operator+=(const Integer& rhs)
-	{
-		this->n_ = getModValue(this->n_ + getModValue(rhs));
-		return *this;
-	}
-
-	inline ResidueInteger operator-(const ResidueInteger& rhs) const
-	{
-		if (this->mod_ != rhs.mod_)
-		{
-			throw invalid_argument("The mods of both operands should be equal.");
-		}
-		return { this->n_ - rhs.n_, this->mod_ };
-	}
-	inline ResidueInteger operator-(const Integer& rhs) const
-	{
-		return { this->n_ - getModValue(rhs), this->mod_ };
-	}
-	friend inline ResidueInteger operator-(const Integer& lhs, const ResidueInteger& rhs)
-	{
-		return { rhs.getModValue(lhs) - rhs.n_, rhs.mod_ };
-	}
-	inline ResidueInteger& operator-=(const ResidueInteger& rhs)
-	{
-		if (this->mod_ != rhs.mod_)
-		{
-			throw invalid_argument("The mods of both operands should be equal.");
-		}
-		this->n_ = getModValue(this->n_ - rhs.n_);
-		return *this;
-	}
-	inline ResidueInteger& operator-=(const Integer& rhs)
-	{
-		this->n_ = getModValue(this->n_ - getModValue(rhs));
-		return *this;
-	}
-
-	inline ResidueInteger operator*(const ResidueInteger& rhs) const
-	{
-		if (this->mod_ != rhs.mod_)
-		{
-			throw invalid_argument("The mods of both operands should be equal.");
-		}
-		return { this->n_ * rhs.n_, this->mod_ };
-	}
-	inline ResidueInteger operator*(const Integer& rhs) const
-	{
-		return { this->n_ * getModValue(rhs), this->mod_ };
-	}
-	friend inline ResidueInteger operator*(const Integer& lhs, const ResidueInteger& rhs)
-	{
-		return { rhs.getModValue(lhs) * rhs.n_, rhs.mod_ };
-	}
-	inline ResidueInteger& operator*=(const ResidueInteger& rhs)
-	{
-		if (this->mod_ != rhs.mod_)
-		{
-			throw invalid_argument("The mods of both operands should be equal.");
-		}
-		this->n_ = getModValue(this->n_ * rhs.n_);
-		return *this;
-	}
-	inline ResidueInteger& operator*=(const Integer& rhs)
-	{
-		this->n_ = getModValue(this->n_ * getModValue(rhs));
-		return *this;
-	}
-
-	inline ResidueInteger operator/(const ResidueInteger& rhs) const
-	{
-		if (this->mod_ != rhs.mod_)
-		{
-			throw invalid_argument("The mods of both operands should be equal.");
-		}
-		return { this->n_ * getModInverse(rhs.n_), this->mod_ };
-	}
-	inline ResidueInteger operator/(const Integer& rhs) const
-	{
-		return { this->n_ * getModInverse(getModValue(rhs)), this->mod_ };
-	}
-	friend inline ResidueInteger operator/(const Integer& lhs, const ResidueInteger& rhs)
-	{
-		return { rhs.getModValue(lhs) * rhs.getModInverse(rhs.n_), rhs.mod_ };
-	}
-	inline ResidueInteger& operator/=(const ResidueInteger& rhs)
-	{
-		if (this->mod_ != rhs.mod_)
-		{
-			throw invalid_argument("The mods of both operands should be equal.");
-		}
-		this->n_ = getModValue(this->n_ * getModInverse(rhs.n_));
-		return *this;
-	}
-	inline ResidueInteger& operator/=(const Integer& rhs)
-	{
-		this->n_ = getModValue(this->n_ * getModInverse(getModValue(rhs)));
-		return *this;
-	}
-
-	inline bool operator==(const ResidueInteger& rhs) const
-	{
-		return (this->n_ == rhs.n_) && (this->mod_ == rhs.mod_);
-	}
-	inline bool operator==(const Integer& rhs) const
-	{
-		return this->n_ == getModValue(rhs);
-	}
-	friend bool operator==(const Integer& lhs, const ResidueInteger& rhs)
-	{
-		return rhs.getModValue(lhs) == rhs.n_;
-	}
-
-	Integer get_n() const { return n_; }
-
-	friend std::ostream& operator<<(std::ostream& lhs, const ResidueInteger& rhs)
-	{
-		return lhs << rhs.n_;
-	}
-
-	friend std::istream& operator>>(std::istream& lhs, ResidueInteger& rhs)
-	{
-		lhs >> rhs.n_;
-		return lhs;
-	}
-};
-using rll = ResidueInteger<ll>;
-template<> ll rll::default_mod_ = 1000000007LL;
-
-rll mod_comb(ll n, ll r) {
-	rll res(1LL);
-	for (ll i = 0; i < r; ++i)
-	{
-		res *= n - i;
-		res /= i + 1LL;
-	}
-
-	return res;
 }
 
 template <class Integer>
