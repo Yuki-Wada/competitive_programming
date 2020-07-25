@@ -13,5 +13,4 @@ let () = Scanf.scanf "%d\n" @@ fun n ->
             set_val (m + 1) n;
         ) else 1 in
 
-    Printf.printf "%d\n" @@ Array.fold_left (+) 0 @@ Array.map (set_val 1) as_ 
-
+    Printf.printf "%d\n" @@ Array.fold_left (+) 0 @@ Array.map (set_val 1) as_

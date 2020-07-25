@@ -19,4 +19,3 @@ let () = Scanf.scanf "%d %d %d\n" @@ fun n m k ->
     Array.init (n + 1) @@ fun i ->
         if k < inc.(i) then 0
         else i + upper_bound 0 (m + 1) (fun j -> inc.(i) + inc'.(j) <= k)
-

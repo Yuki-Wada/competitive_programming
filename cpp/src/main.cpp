@@ -55,53 +55,58 @@ template<class t> inline string tostring(t x) { ostringstream sout; sout << x; r
 #define DUMP(x)  cerr << #x << " = " << (x) << endl
 #define DEBUG(x) cerr << #x << " = " << (x) << " (l" << __LINE__ << ")" << " " << __FILE__ << endl
 
-ll x, k, y;
-
-ll get_min_mana(ll left_idx, ll right_idx, const vector<ll> & as) {
-	ll left = (left_idx >= 0 ? as[left_idx] : -1);
-	ll right = (right_idx < as.size() ? as[right_idx] : -1);
-
-	ll count_to_delete = right_idx - left_idx - 1;
-	if (count_to_delete == 0) return 0;
-
-	bool exist_upper = false;
-	REPD(i, left_idx + 1, right_idx) if (as[i] > max(left, right)) {
-		exist_upper = true;
-		break;
-	}
-
-	if (exist_upper && count_to_delete < k) return -1;
-
-	if (x <= k * y) return (count_to_delete / k) * x + (count_to_delete % k) * y;
-	if (exist_upper) return x + (count_to_delete - k) * y;
-	return count_to_delete * y;
-}
-
 int solve() {
-	ll n, m;
-	cin >> n >> m >> x >> k >> y;
+	ll n;
+	cin >> n;
 
-	vector<ll> as(n), bs(m);
-	REPD(i, 0, n) cin >> as[i];
-	REPD(i, 0, m) cin >> bs[i];
+	string A, B;
+	cin >> A >> B;
+	
+	REPD(i, 0, n) if (A[i] > B[i]) RET(-1);
 
-	cout << MOD;
-	ll res = 0, mana;
-	ll prev_a_idx = -1, a_idx = 0;
-	ll b_idx = 0;
-	REP(b_idx, 0, m) {
-		while (a_idx < n && as[a_idx] != bs[b_idx]) ++a_idx;
-		if (a_idx >= n) RET(-1);
-		mana = get_min_mana(prev_a_idx, a_idx, as);
-		if (mana == -1) RET(-1);
-		res += mana;
-		prev_a_idx = a_idx;
+	vector<vector<bool>> adjs(20, vector<bool>(20, false));
+	REPD(i, 0, n) {
+		ll pos_a = A[i] - 'a';
+		ll pos_b = B[i] - 'a';
+		if (pos_a < pos_b) adjs[pos_a][pos_b] = true;
 	}
-	mana = get_min_mana(prev_a_idx, n, as);
-	if (mana == -1) RET(-1);
-	res += mana;
+
+	REPD(row_src, 0, 20) {
+		REPD(row_tgt, row_src + 1, 20) {
+			ll count = 0;
+			REPD(col_dst, 0, 20) {
+				if (adjs[row_src][col_dst] && adjs[row_tgt][col_dst]) ++count;
+				if (count >= 2) break;
+			}
+			if (count >= 2) {
+				adjs[row_src][row_tgt] = true;
+			}
+		}
+	}
+
+	vector<vector<ll>> path_counts(20, vector<ll>(20));
+	REPD(col_dst, 0, 20) {
+		for (ll row_src = col_dst - 1LL; row_src >= 0LL; --row_src) {
+			if (!adjs[row_src][col_dst]) continue;
+			for (ll i = 0; i < row_src; ++i) {
+				path_counts[i][col_dst] += path_counts[i][row_src];
+			}
+			++path_counts[row_src][col_dst];
+		}
+	}
+	ll res = 0;
+	REPD(col_dst, 0, 20) {
+		REPD(row_src, 0, 20) {
+			if (adjs[row_src][col_dst]) ++res;
+			if (path_counts[row_src][col_dst] > 1) {
+				res -= path_counts[row_src][col_dst] - 1;
+			}
+		}
+	}
 
 	RET(res);
+
+	return 0;
 }
 
 //main function
@@ -110,7 +115,9 @@ int main()
 	cin.tie(0);
 	ios::sync_with_stdio(false);
 
-	solve();
+	ll t;
+	cin >> t;
+	REPD(i, 0, t) solve();
 
 	return 0;
 }
