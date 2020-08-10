@@ -117,6 +117,37 @@ inline Integer get_power(Integer base, ull exponential)
 	return result;
 }
 
+vector<vector<ll>> enumerate_combination(ll n, ll k) {
+	if (n == 0) return {};
+	if (k == 0) return {};
+	if (n < k) return {};
+
+	vector<vector<ll>> res;
+	if (k == 1) {
+		for (ll i = 0; i < n; ++i) {
+			res.emplace_back(vector<ll>(1, i));
+		}
+		return res;
+	}
+	if (n == k) {
+		vector<ll> v(n);
+		for (ll i = 0; i < n; ++i) {
+			v[i] = i;
+		}
+		res.emplace_back(v);
+		return res;
+	}
+	res = enumerate_combination(n - 1, k);
+	vector<vector<ll>> pre = enumerate_combination(n - 1, k - 1);
+	res.reserve(res.size() + pre.size());
+	for (ll i = 0; i < pre.size(); ++i) {
+		pre[i].emplace_back(n - 1);
+	}
+	copy(pre.begin(), pre.end(), std::back_inserter(res));
+
+	return res;
+}
+
 template <class Integer>
 class Matrix
 {

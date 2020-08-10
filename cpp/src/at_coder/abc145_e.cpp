@@ -49,64 +49,47 @@ template<class t> inline string tostring(t x) { ostringstream sout; sout << x; r
 // for loop
 #define REP(i, a, b) for ((i) = (ll)(a);(i) < (ll)(b);(i)++)
 #define REPD(i, a, b) for (ll i = (ll)(a);(i) < (ll)(b);(i)++)
-#define REPI(v, vs) for (auto v : vs)
+#define REPI(v, vs) for (auto& v : vs)
 
 //debug
 #define DUMP(x)  cerr << #x << " = " << (x) << endl
 #define DEBUG(x) cerr << #x << " = " << (x) << " (l" << __LINE__ << ")" << " " << __FILE__ << endl
 
+#define MAX_VALUE 9223372036854775807
+
+vector<vector<ll>> dps;
+
+ll calc_dps(ll idx, ll t, const vector<pair<ll, ll>>& ABs) {
+	if (idx < 0) return 0;
+	if (t < 0) return 0;
+	if (dps[idx][t] != -1) return dps[idx][t];
+
+	ll res = calc_dps(idx - 1, t, ABs);
+	if (t >= ABs[idx].first) {
+		res = max(res, calc_dps(idx - 1, t - ABs[idx].first, ABs) + ABs[idx].second);
+	}
+
+	dps[idx][t] = res;
+	return dps[idx][t];
+}
+
 int solve() {
-	ll n;
-	cin >> n;
+	ll N, T;
+	cin >> N >> T;
 
-	string A, B;
-	cin >> A >> B;
-	
-	REPD(i, 0, n) if (A[i] > B[i]) RET(-1);
+	vector<pair<ll, ll>> ABs(N);
+	ll A, B;
+	REPD(i, 0, N) {
+		cin >> A >> B;
+		ABs[i] = {A, B};
+	}
+	sort(ABs.begin(), ABs.end());
 
-	vector<vector<bool>> adjs(20, vector<bool>(20, false));
-	REPD(i, 0, n) {
-		ll pos_a = A[i] - 'a';
-		ll pos_b = B[i] - 'a';
-		if (pos_a < pos_b) adjs[pos_a][pos_b] = true;
-	}
-
-	REPD(row_src, 0, 20) {
-		REPD(row_tgt, row_src + 1, 20) {
-			ll count = 0;
-			REPD(col_dst, 0, 20) {
-				if (adjs[row_src][col_dst] && adjs[row_tgt][col_dst]) ++count;
-				if (count >= 2) break;
-			}
-			if (count >= 2) {
-				adjs[row_src][row_tgt] = true;
-			}
-		}
-	}
-
-	vector<vector<ll>> path_counts(20, vector<ll>(20));
-	REPD(col_dst, 0, 20) {
-		for (ll row_src = col_dst - 1LL; row_src >= 0LL; --row_src) {
-			if (!adjs[row_src][col_dst]) continue;
-			for (ll i = 0; i < row_src; ++i) {
-				path_counts[i][col_dst] += path_counts[i][row_src];
-			}
-			++path_counts[row_src][col_dst];
-		}
-	}
-	ll res = 0;
-	REPD(col_dst, 0, 20) {
-		REPD(row_src, 0, 20) {
-			if (adjs[row_src][col_dst]) ++res;
-			if (path_counts[row_src][col_dst] > 1) {
-				res -= path_counts[row_src][col_dst] - 1;
-			}
-		}
-	}
+	dps = vector<vector<ll>>(N, vector<ll>(T, -1));
+	ll res = ABs[0].second;
+	REPD(i, 0, N) res = max(res, ABs[i].second + calc_dps(i - 1, T - 1, ABs));
 
 	RET(res);
-
-	return 0;
 }
 
 //main function
@@ -115,9 +98,10 @@ int main()
 	cin.tie(0);
 	ios::sync_with_stdio(false);
 
-	ll t;
-	cin >> t;
-	REPD(i, 0, t) solve();
+	solve();
+	// ll t;
+	// cin >> t;
+	// REPD(i, 0, t) solve();
 
 	return 0;
 }

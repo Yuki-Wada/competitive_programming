@@ -1,7 +1,11 @@
 .vs/
-.vscode/
 build/
 CMakeFiles/
 *.cmi
 *.cmo
 *.out
+main.cpp
+main.py
+main.ml
+main
+input.txt
