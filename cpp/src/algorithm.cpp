@@ -457,95 +457,13 @@ bool topological_sort(const vector<vector<ll>>& edges, vector<ll>& result) {
 	return true;
 }
 
-struct ShakutoriManager
-{
-	// ó‘Ô‚ð•Û‘¶‚·‚é‚½‚ß‚Ì•Ï”‚ð’è‹`
-	//set<ll> counts;
-	// •Ï”‚ð‰Šú‰»‚·‚é‚½‚ß‚ÌƒRƒ“ƒXƒgƒ‰ƒNƒ^‚ð’è‹`
-	//ShakutoriManager() : counts() {}
-
-	void register_func(ll v)
-	{
-		// ˆ—‚ð‹Lq
-		//counts.insert(v);
-	};
-	void pop_func(ll v)
-	{
-		// ˆ—‚ð‹Lq
-		//counts.erase(v);
-	};
-	bool necessary_cond(ll v)
-	{
-		// ˆ—‚ð‹Lq
-		//return counts.count(v) == 0;
-	};
-	ll update(ll res, ll s, ll t)
-	{
-		// ˆ—‚ð‹Lq
-		//return max(res, t - s);
-	};
-};
-
-// A º B ‚È‚ç‚ÎAScore(A) <= Score(B) ‚ð–ž‚½‚·‚Æ‰¼’è‚·‚éB
-//
-// ˆÈ‰º‚ð–ž‚½‚·‚æ‚¤‚ÈðŒ cond ‚ðŽg—p‚µ‚½‚µ‚á‚­‚Æ‚è–@B
-// A º B ‚©‚Â B ‚ªðŒ cond ‚ð–ž‚½‚·‚È‚ç‚ÎAA ‚àðŒ cond ‚ð–ž‚½‚·B
-//
-// ðŒ‚ð–ž‚½‚·W‡ A ‚Ì‚¤‚¿AÅ‘å‚Ì Score(A) ‚ð‹‚ß‚éB
-template<class T, class Manager>
-ll shakutori_method1(const vector<T>& values, Manager manager)
-{
-	// ƒAƒ‹ƒSƒŠƒYƒ€‚ÌƒƒCƒ“•”•ªB
-	ll result = 0;
-	ll s = 0, t = 0;
-	for (; s < values.size(); ++s)
-	{
-		for (; t < values.size() && manager.necessary_cond(values[t]); ++t)
-		{
-			manager.register_func(values[t]);
-		}
-		result = manager.update(result, s, t);
-		manager.pop_func(values[s]);
-	}
-
-	return result;
-};
-
-// A º B ‚È‚ç‚ÎAScore(A) <= Score(B) ‚ð–ž‚½‚·‚Æ‰¼’è‚·‚éB
-//
-// ˆÈ‰º‚ð–ž‚½‚·‚æ‚¤‚ÈðŒ cond ‚ðŽg—p‚µ‚½‚µ‚á‚­‚Æ‚è–@B
-// A º B ‚©‚Â A ‚ªðŒ cond ‚ð–ž‚½‚·‚È‚ç‚ÎAB ‚àðŒ cond ‚ð–ž‚½‚·B
-//
-// ðŒ‚ð–ž‚½‚·W‡ A ‚Ì‚¤‚¿AÅ¬‚Ì Score(A) ‚ð‹‚ß‚éB
-template<class T, class Manager>
-ll shakutori_method2(const vector<T>& values, Manager manager)
-{
-	// ƒAƒ‹ƒSƒŠƒYƒ€‚ÌƒƒCƒ“•”•ªB
-	ll result = 0;
-	ll s = 0, t = 0;
-	for (; s < values.size(); ++s)
-	{
-		for (; t < values.size() && !manager.necessary_cond(); ++t)
-		{
-			manager.register_func(values[t]);
-		}
-		if (!manager.necessary_cond())
-			break;
-		result = manager.update(result, s, t);
-		manager.pop_func(values[s]);
-	}
-
-	return result;
-};
-
-//classes and functions
 vector<comp> fft(const vector<comp>& function)
 {
 	ll degree = function.size();
 	if (degree == 0LL)
-		throw runtime_error("”z—ñ‚Ì—v‘f”‚Í 1 ˆÈã‚Å‚ ‚é•K—v‚ª‚ ‚è‚Ü‚·B");
+		throw runtime_error("é…åˆ—ã®è¦ç´ æ•°ã¯ 1 ä»¥ä¸Šã§ã‚ã‚‹å¿…è¦ãŒã‚ã‚Šã¾ã™ã€‚");
 	if ((degree & (degree - 1LL)) != 0LL)
-		throw runtime_error("”z—ñ‚Ì—v‘f”‚Í 2 ‚Ì‚×‚«æ‚Å‚ ‚é•K—v‚ª‚ ‚è‚Ü‚·B");
+		throw runtime_error("é…åˆ—ã®è¦ç´ æ•°ã¯ 2 ã®ã¹ãä¹—ã§ã‚ã‚‹å¿…è¦ãŒã‚ã‚Šã¾ã™ã€‚");
 
 	if (degree == 1LL)
 		return { function[0] };
@@ -589,4 +507,113 @@ vector<comp> inv_fft(const vector<comp>& function)
 	}
 
 	return move(conj_function);
+}
+
+ll default_number_theoretic_transform_mod = 998244353LL; // 998244353 = 119 * 2^23 + 1
+ll default_number_theoretic_transform_primitive_root = 3LL; // primitive root of 998244353
+
+vector<ll> fmt(
+	const vector<ll>& function,
+	ll mod = default_number_theoretic_transform_mod,
+	ll primitive_root = default_number_theoretic_transform_primitive_root
+)
+{
+	ll degree = function.size();
+	if (degree == 0LL)
+		throw runtime_error("é…åˆ—ã®è¦ç´ æ•°ã¯ 1 ä»¥ä¸Šã§ã‚ã‚‹å¿…è¦ãŒã‚ã‚Šã¾ã™ã€‚");
+	if ((degree & (degree - 1LL)) != 0LL)
+		throw runtime_error("é…åˆ—ã®è¦ç´ æ•°ã¯ 2 ã®ã¹ãä¹—ã§ã‚ã‚‹å¿…è¦ãŒã‚ã‚Šã¾ã™ã€‚");
+	if ((mod - 1LL) % degree != 0LL)
+		throw runtime_error("mod - 1 ã¯é…åˆ—ã®è¦ç´ æ•°ã§å‰²ã‚Šåˆ‡ã‚Œã‚‹å¿…è¦ãŒã‚ã‚Šã¾ã™ã€‚");
+
+	if (degree == 1LL)
+		return { function[0] };
+
+	auto get_mod = [&](const ll& n){
+		return (n % mod + mod) % mod;
+	};
+
+	vector<ll> function0(degree / 2LL);
+	vector<ll> function1(degree / 2LL);
+	for (ll i = 0; i < degree / 2LL; ++i)
+	{
+		function0[i] = function[i * 2LL];
+		function1[i] = function[i * 2LL + 1LL];
+		function0[i] = get_mod(function0[i]);
+		function1[i] = get_mod(function1[i]);
+	}
+	function0 = fmt(function0, mod, primitive_root);
+	function1 = fmt(function1, mod, primitive_root);
+
+	auto get_mod_power = [&](ll base, ull exponential){
+		ll result = 1;
+		while (exponential >= 1)
+		{
+			if (exponential & 1)
+			{
+				result *= base;
+				result = get_mod(result);
+			}
+			base *= base;
+			base = get_mod(base);
+			exponential >>= 1;
+		}
+
+		return result;
+	};
+
+	const ll xi = get_mod_power(primitive_root, (mod - 1LL) / degree);
+	ll power_of_xi = 1;
+	vector<ll> transformed_function(degree);
+	for (ll i = 0; i < degree; ++i)
+	{
+		auto res_i = i % (degree / 2LL);
+		transformed_function[i] = function0[res_i] + function1[res_i] * power_of_xi;
+		power_of_xi *= xi;
+		transformed_function[i] = get_mod(transformed_function[i]);
+		power_of_xi = get_mod(power_of_xi);
+	}
+
+	return move(transformed_function);
+}
+
+vector<ll> inv_fmt(
+	const vector<ll>& function,
+	ll mod = default_number_theoretic_transform_mod,
+	ll primitive_root = default_number_theoretic_transform_primitive_root
+)
+{
+	auto get_mod = [&](const ll& n){
+		return (n % mod + mod) % mod;
+	};
+
+	auto get_mod_inverse = [&](const ll& n, ll mod) -> ll{
+		struct BezoutsIdentitySolver {
+			static pair<ll, ll> execute(ll a, ll b) {
+				if (b == 0)
+				{
+					return { 1, 0 };
+				}
+				auto sol = execute(b, a % b);
+				return { sol.second, sol.first - (a / b) * sol.second };
+			}
+		};
+		auto sol = BezoutsIdentitySolver::execute(n, mod);
+		if (n * sol.first + mod * sol.second != 1)
+		{
+			return -1;
+		}
+		return get_mod(sol.first);
+	};
+
+	auto inverse_primitive_root =  get_mod_inverse(primitive_root, mod);
+	vector<ll> transformed_function = fmt(
+		function, mod, inverse_primitive_root);
+	auto inverse_n = get_mod_inverse(function.size(), mod);
+	for (ll i = 0; i < function.size(); ++i)
+	{
+		transformed_function[i] = get_mod(transformed_function[i] * inverse_n);
+	}
+
+	return move(transformed_function);
 }

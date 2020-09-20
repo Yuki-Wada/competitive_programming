@@ -34,7 +34,7 @@ using ll = long long;
 using ull = unsigned long long;
 using comp = complex<double>;
 
-const ll MOD = 1000000007LL;
+const ll MOD = 998244353LL;;
 const double PI = 3.14159265358979323846;
 
 //conversion
@@ -63,10 +63,10 @@ int solve() {
 			rd = (e - 1 >= 0 ? results[e - 1][f] : 0);
 			lu = (f - 1 >= 0 ? results[e][f - 1] : 0);
 			ld = (e - 1 >= 0 && f - 1 >= 0 ? results[e - 1][f - 1] : 0);
-			res = rd * (f + B) % rll::default_mod_ +
-				lu * (e + A) % rll::default_mod_ -
-				ld * (e + A - 1) % rll::default_mod_ * (f + B - 1) % rll::default_mod_;
-			res = (res + rll::default_mod_) % rll::default_mod_;
+			res = rd * (f + B) % MOD +
+				lu * (e + A) % MOD -
+				ld * (e + A - 1) % MOD * (f + B - 1) % MOD;
+			res = (res + MOD) % MOD;
 
 			results[e][f] = res;
 		}

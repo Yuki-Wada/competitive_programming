@@ -1,11 +1,14 @@
 .vs/
+atcoder/
 build/
 CMakeFiles/
 *.cmi
 *.cmo
 *.out
 main.cpp
+main_acl.cpp
 main.py
 main.ml
 main
+main_acl
 input.txt

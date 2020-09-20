@@ -50,7 +50,7 @@ struct Graph
 	vector<vector<tuple<Vertex, Vertex>>> get_adjacency_list() const
 	{
 		using EdgeWithInfo = tuple<Vertex, Vertex>;
-		// •Ó‚Ì—×ÚƒŠƒXƒg‚ğì¬
+		// è¾ºã®éš£æ¥ãƒªã‚¹ãƒˆã‚’ä½œæˆ
 		vector<vector<EdgeWithInfo>> adjancency_list(vertex_count);
 		for (ll i = 0; i < edges.size(); ++i)
 		{
@@ -65,7 +65,7 @@ struct Graph
 	vector<vector<tuple<Vertex, Vertex, EdgeInfo>>> get_adjacency_list(const vector<EdgeInfo>& infos) const
 	{
 		using EdgeWithInfo = tuple<Vertex, Vertex, EdgeInfo>;
-		// •Ó‚Ì—×ÚƒŠƒXƒg‚ğì¬
+		// è¾ºã®éš£æ¥ãƒªã‚¹ãƒˆã‚’ä½œæˆ
 		vector<vector<EdgeWithInfo>> adjancency_list(vertex_count);
 		for (ll i = 0; i < edges.size(); ++i)
 		{
@@ -78,19 +78,19 @@ struct Graph
 	}
 };
 
-// n“_ s ‚©‚çŠe“_‚Ö‚ÌÅ’Z‹——£‚ğ•Ô‚µ‚Ü‚·B
-// ƒpƒX©‘Ì‚ª‘¶İ‚µ‚È‚¢ê‡‚Í -1 ‚ğ•Ô‚µ‚Ü‚·B
-// ‹——£ lengths ‚ÌŠe—v‘f‚É‚Æ‚­‚ÉğŒ‚Í‚ ‚è‚Ü‚¹‚ñB
-// ’·‚³‚ª•‰‚Æ‚È‚éŒo˜H‚ª‘¶İ‚µ‚È‚¢ê‡‚ğ‘z’è‚µ‚Ä‚¨‚èA•‰Œo˜H‚ª‘¶İ‚·‚é‚©‚Í•Ê‚Ì•û–@‚ÅŒŸo‚·‚é•K—v‚ª‚ ‚è‚Ü‚·B
+// å§‹ç‚¹ s ã‹ã‚‰å„ç‚¹ã¸ã®æœ€çŸ­è·é›¢ã‚’è¿”ã—ã¾ã™ã€‚
+// ãƒ‘ã‚¹è‡ªä½“ãŒå­˜åœ¨ã—ãªã„å ´åˆã¯ -1 ã‚’è¿”ã—ã¾ã™ã€‚
+// è·é›¢ lengths ã®å„è¦ç´ ã«ã¨ãã«æ¡ä»¶ã¯ã‚ã‚Šã¾ã›ã‚“ã€‚
+// é•·ã•ãŒè² ã¨ãªã‚‹çµŒè·¯ãŒå­˜åœ¨ã—ãªã„å ´åˆã‚’æƒ³å®šã—ã¦ãŠã‚Šã€è² çµŒè·¯ãŒå­˜åœ¨ã™ã‚‹ã‹ã¯åˆ¥ã®æ–¹æ³•ã§æ¤œå‡ºã™ã‚‹å¿…è¦ãŒã‚ã‚Šã¾ã™ã€‚
 pair<vector<ll>, vector<ll>> bellman_ford(const Graph& graph, const vector<ll>& lengths, ll s = 0LL)
 {
 	using Vertex = ll;
 	using Length = ll;
 
 	if (graph.edges.size() != lengths.size())
-		throw runtime_error("ƒOƒ‰ƒt‚Ì•Ó‚Ì—v‘f”‚Æ•Ó‚Ì’·‚³‚Ì—v‘f”‚Íˆê’v‚µ‚Ä‚¢‚é•K—v‚ª‚ ‚è‚Ü‚·B");
+		throw runtime_error("ã‚°ãƒ©ãƒ•ã®è¾ºã®è¦ç´ æ•°ã¨è¾ºã®é•·ã•ã®è¦ç´ æ•°ã¯ä¸€è‡´ã—ã¦ã„ã‚‹å¿…è¦ãŒã‚ã‚Šã¾ã™ã€‚");
 
-	// ƒAƒ‹ƒSƒŠƒYƒ€–{‘Ì
+	// ã‚¢ãƒ«ã‚´ãƒªã‚ºãƒ æœ¬ä½“
 	vector<Length> dists(graph.vertex_count, 1LL << 60);
 	vector<Vertex> prev_vertices(graph.vertex_count, -1LL);
 
@@ -115,21 +115,21 @@ pair<vector<ll>, vector<ll>> bellman_ford(const Graph& graph, const vector<ll>& 
 	return { dists, prev_vertices };
 }
 
-// n“_ s ‚©‚çŠe“_‚Ö‚ÌÅ’Z‹——£‚ğ•Ô‚µ‚Ü‚·B
-// ƒpƒX©‘Ì‚ª‘¶İ‚µ‚È‚¢ê‡‚Í -1 ‚ğ•Ô‚µ‚Ü‚·B
-// ‹——£ lengths ‚ÌŠe—v‘f‚Í”ñ•‰‚Å‚ ‚é•K—v‚ª‚ ‚è‚Ü‚·B
+// å§‹ç‚¹ s ã‹ã‚‰å„ç‚¹ã¸ã®æœ€çŸ­è·é›¢ã‚’è¿”ã—ã¾ã™ã€‚
+// ãƒ‘ã‚¹è‡ªä½“ãŒå­˜åœ¨ã—ãªã„å ´åˆã¯ -1 ã‚’è¿”ã—ã¾ã™ã€‚
+// è·é›¢ lengths ã®å„è¦ç´ ã¯éè² ã§ã‚ã‚‹å¿…è¦ãŒã‚ã‚Šã¾ã™ã€‚
 pair<vector<ll>, vector<ll>> dijkstra(const Graph& graph, const vector<ll>& lengths, ll s = 0LL)
 {
 	using Vertex = ll;
 	using Length = ll;
 
 	if (graph.edges.size() != lengths.size())
-		throw runtime_error("ƒOƒ‰ƒt‚Ì•Ó‚Ì—v‘f”‚Æ•Ó‚Ì’·‚³‚Ì—v‘f”‚Íˆê’v‚µ‚Ä‚¢‚é•K—v‚ª‚ ‚è‚Ü‚·B");
+		throw runtime_error("ã‚°ãƒ©ãƒ•ã®è¾ºã®è¦ç´ æ•°ã¨è¾ºã®é•·ã•ã®è¦ç´ æ•°ã¯ä¸€è‡´ã—ã¦ã„ã‚‹å¿…è¦ãŒã‚ã‚Šã¾ã™ã€‚");
 
-	// •Ó‚Ì—×ÚƒŠƒXƒg‚ğì¬
+	// è¾ºã®éš£æ¥ãƒªã‚¹ãƒˆã‚’ä½œæˆ
 	auto adjacency_list = graph.get_adjacency_list(lengths);
 
-	// ƒAƒ‹ƒSƒŠƒYƒ€–{‘Ì
+	// ã‚¢ãƒ«ã‚´ãƒªã‚ºãƒ æœ¬ä½“
 	using VertexInfo = pair<Length, Vertex>;
 	priority_queue<VertexInfo, vector<VertexInfo>, greater<VertexInfo>> queue;
 	vector<Length> dists(graph.vertex_count, 1LL << 60);
@@ -166,8 +166,8 @@ pair<vector<ll>, vector<ll>> dijkstra(const Graph& graph, const vector<ll>& leng
 	return { dists, prev_vertices };
 }
 
-// n“_ s ‚©‚çI“_ t ‚Ö‚ÌÅ‘åƒtƒ[‚ğ•Ô‚µ‚Ü‚·B
-// ‹——£ capacities ‚ÌŠe—v‘f‚Í”ñ•‰‚Å‚ ‚é•K—v‚ª‚ ‚è‚Ü‚·B
+// å§‹ç‚¹ s ã‹ã‚‰çµ‚ç‚¹ t ã¸ã®æœ€å¤§ãƒ•ãƒ­ãƒ¼ã‚’è¿”ã—ã¾ã™ã€‚
+// è·é›¢ capacities ã®å„è¦ç´ ã¯éè² ã§ã‚ã‚‹å¿…è¦ãŒã‚ã‚Šã¾ã™ã€‚
 ll edmonds_karp(const Graph& graph, const vector<ll>& capacities, ll s, ll t)
 {
 	using Capacity =ll;
@@ -184,12 +184,12 @@ ll edmonds_karp(const Graph& graph, const vector<ll>& capacities, ll s, ll t)
 	};
 
 	if (s == t)
-		throw runtime_error("ƒtƒ[‚Ìn“_‚ÆI“_‚ÍˆÙ‚È‚Á‚Ä‚¢‚é•K—v‚ª‚ ‚è‚Ü‚·B");
+		throw runtime_error("ãƒ•ãƒ­ãƒ¼ã®å§‹ç‚¹ã¨çµ‚ç‚¹ã¯ç•°ãªã£ã¦ã„ã‚‹å¿…è¦ãŒã‚ã‚Šã¾ã™ã€‚");
 
 	if (graph.edges.size() != capacities.size())
-		throw runtime_error("ƒOƒ‰ƒt‚Ì•Ó‚Ì—v‘f”‚Æ•Ó‚Ì—e—Ê‚Ì—v‘f”‚Íˆê’v‚µ‚Ä‚¢‚é•K—v‚ª‚ ‚è‚Ü‚·B");
+		throw runtime_error("ã‚°ãƒ©ãƒ•ã®è¾ºã®è¦ç´ æ•°ã¨è¾ºã®å®¹é‡ã®è¦ç´ æ•°ã¯ä¸€è‡´ã—ã¦ã„ã‚‹å¿…è¦ãŒã‚ã‚Šã¾ã™ã€‚");
 
-	// •Ó‚Ì—×ÚƒŠƒXƒg‚ğì¬
+	// è¾ºã®éš£æ¥ãƒªã‚¹ãƒˆã‚’ä½œæˆ
 	vector<vector<_Edge>> edges(graph.vertex_count);
 	for (ll i = 0; i < graph.edges.size(); ++i)
 	{
@@ -197,7 +197,7 @@ ll edmonds_karp(const Graph& graph, const vector<ll>& capacities, ll s, ll t)
 		tie(from, to) = graph.edges[i];
 		Capacity capacity = capacities[i];
 		if (capacity < 0)
-			throw runtime_error("ƒOƒ‰ƒt‚Ì•Ó‚Ì—e—Ê‚Í”ñ•‰‚Å‚ ‚é•K—v‚ª‚ ‚è‚Ü‚·B");
+			throw runtime_error("ã‚°ãƒ©ãƒ•ã®è¾ºã®å®¹é‡ã¯éè² ã§ã‚ã‚‹å¿…è¦ãŒã‚ã‚Šã¾ã™ã€‚");
 
 		edges[from].emplace_back(from, to, capacity, -1LL);
 		edges[to].emplace_back(to, from, 0LL, -1LL);
@@ -208,7 +208,7 @@ ll edmonds_karp(const Graph& graph, const vector<ll>& capacities, ll s, ll t)
 		return edges[edge.to][edge.reverse_index];
 	};
 
-	// ƒAƒ‹ƒSƒŠƒYƒ€–{‘Ì
+	// ã‚¢ãƒ«ã‚´ãƒªã‚ºãƒ æœ¬ä½“
 	ll max_flow = 0LL;
 	while (true)
 	{
@@ -229,10 +229,10 @@ ll edmonds_karp(const Graph& graph, const vector<ll>& capacities, ll s, ll t)
 			}
 		}
 
-		// Å¬ƒpƒX‚ª‚È‚¯‚ê‚Îƒ‹[ƒv‚ğ”²‚¯‚é
+		// æœ€å°ãƒ‘ã‚¹ãŒãªã‘ã‚Œã°ãƒ«ãƒ¼ãƒ—ã‚’æŠœã‘ã‚‹
 		if (prev_vertices[t] == nullptr) break;
 
-		// Å¬ƒpƒX‚ğŒ©‚Â‚¯‚é
+		// æœ€å°ãƒ‘ã‚¹ã‚’è¦‹ã¤ã‘ã‚‹
 		stack<_Edge*> path;
 		Capacity min_capacity = 1LL << 60;
 		path.emplace(prev_vertices[t]);
@@ -243,7 +243,7 @@ ll edmonds_karp(const Graph& graph, const vector<ll>& capacities, ll s, ll t)
 		}
 		min_capacity = min(min_capacity, path.top()->capacity);
 
-		// Capacity ‚ğXV
+		// Capacity ã‚’æ›´æ–°
 		while (!path.empty())
 		{
 			auto& edge = *path.top();

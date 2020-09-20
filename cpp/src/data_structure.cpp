@@ -129,6 +129,7 @@ public:
 
 	Integer query(ll index)
 	{
+		if (index < 0LL) return 0; 
 		if (maxSize_ <= index)
 		{
 			throw invalid_argument("Index should be less than maxSize.");
@@ -144,7 +145,7 @@ public:
 		return res;
 	}
 };
-using bit = BinaryIndexedTree<ll>;
+using BIT = BinaryIndexedTree<ll>;
 
 template<class Integer>
 class RangedMinimumQuery
@@ -217,4 +218,4 @@ public:
 		return _query(start, end, 0, maxSize_, 0);
 	}
 };
-using rmq = RangedMinimumQuery<ll>;
+using RMQ = RangedMinimumQuery<ll>;
