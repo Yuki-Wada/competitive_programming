@@ -100,6 +100,7 @@ public:
 	friend bool operator==(const ResidueInteger& lhs, const ll& rhs);
 	friend bool operator==(const ll& lhs, const ResidueInteger& rhs);
 
+	ll mod() const { return mod_; }
 	ll n() const { return n_; }
 
 	friend std::ostream& operator<<(std::ostream& lhs, const ResidueInteger& rhs);
