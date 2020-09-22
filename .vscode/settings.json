@@ -1,2 +1,12 @@
 {
+    "files.associations": {
+        "iostream": "cpp",
+        "*.tcc": "cpp",
+        "random": "cpp",
+        "iomanip": "cpp",
+        "all": "cpp",
+        "cctype": "cpp",
+        "stdexcept": "cpp",
+        "tuple": "cpp"
+    }
 }

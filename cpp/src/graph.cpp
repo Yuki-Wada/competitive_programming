@@ -31,48 +31,50 @@ using namespace std;
 using ll = long long;
 using ull = unsigned long long;
 
-using Edge = pair<ll, ll>;
-
-struct Graph
-{
+template <class EdgeInfo>
+struct Graph {
 	using Vertex = ll;
+	using Edge = tuple<Vertex, Vertex, EdgeInfo>;
 	ll vertex_count;
 	vector<Edge> edges;
 
 	Graph() : vertex_count(0LL), edges(0LL) {}
 	Graph(ll vertex_count) : vertex_count(vertex_count), edges(0LL) {}
 
-	void add_edge(const Edge& edge)
+	void add_edge(Vertex from, Vertex to, EdgeInfo edge_info)
 	{
-		edges.emplace_back(edge);
+		edges.emplace_back(from, to, edge_info);
 	}
 
-	vector<vector<tuple<Vertex, Vertex>>> get_adjacency_list() const
+	void add_edge(Vertex from, Vertex to)
 	{
-		using EdgeWithInfo = tuple<Vertex, Vertex>;
+		edges.emplace_back(from, to, edge_info, EdgeInfo());
+	}
+
+	vector<vector<Edge>> get_adjacency_list() const
+	{
 		// 辺の隣接リストを作成
-		vector<vector<EdgeWithInfo>> adjancency_list(vertex_count);
+		vector<vector<Edge>> adjancency_list(vertex_count);
 		for (ll i = 0; i < edges.size(); ++i)
 		{
 			Vertex from, to;
-			tie(from, to) = edges[i];
-			adjancency_list[from].emplace_back(from, to);
+			EdgeInfo info;
+			tie(from, to, info) = edges[i];
+			adjancency_list[from].emplace_back(from, to, info);
 		}
 		return move(adjancency_list);
 	}
 
-	template<class EdgeInfo>
-	vector<vector<tuple<Vertex, Vertex, EdgeInfo>>> get_adjacency_list(const vector<EdgeInfo>& infos) const
+	vector<vector<Vertex>> get_adjacency_list_with_no_info() const
 	{
-		using EdgeWithInfo = tuple<Vertex, Vertex, EdgeInfo>;
 		// 辺の隣接リストを作成
-		vector<vector<EdgeWithInfo>> adjancency_list(vertex_count);
+		vector<vector<Vertex>> adjancency_list(vertex_count);
 		for (ll i = 0; i < edges.size(); ++i)
 		{
 			Vertex from, to;
-			tie(from, to) = edges[i];
-			const EdgeInfo& info = infos[i];
-			adjancency_list[from].emplace_back(from, to, info);
+			EdgeInfo info;
+			tie(from, to, info) = edges[i];
+			adjancency_list[from].emplace_back(to);
 		}
 		return move(adjancency_list);
 	}
@@ -82,13 +84,10 @@ struct Graph
 // パス自体が存在しない場合は -1 を返します。
 // 距離 lengths の各要素にとくに条件はありません。
 // 長さが負となる経路が存在しない場合を想定しており、負経路が存在するかは別の方法で検出する必要があります。
-pair<vector<ll>, vector<ll>> bellman_ford(const Graph& graph, const vector<ll>& lengths, ll s = 0LL)
+pair<vector<ll>, vector<ll>> bellman_ford(const Graph<ll>& graph, ll s, ll iter_count)
 {
 	using Vertex = ll;
 	using Length = ll;
-
-	if (graph.edges.size() != lengths.size())
-		throw runtime_error("グラフの辺の要素数と辺の長さの要素数は一致している必要があります。");
 
 	// アルゴリズム本体
 	vector<Length> dists(graph.vertex_count, 1LL << 60);
@@ -96,14 +95,13 @@ pair<vector<ll>, vector<ll>> bellman_ford(const Graph& graph, const vector<ll>& 
 
 	dists[s] = 0LL;
 	prev_vertices[s] = s;
-	for (ll i = 0; i + 1 < graph.vertex_count; ++i)
+	ll from, to, length;
+	for (ll i = 0; i + 1 < iter_count; ++i)
 	{
 		for (ll j = 0; j < graph.edges.size(); ++j)
 		{
 			auto& edge = graph.edges[j];
-			ll from, to;
-			tie(from, to) = edge;
-			ll length = lengths[j];
+			tie(from, to, length) = edge;
 			if (dists[to] > dists[from] + length)
 			{
 				dists[to] = min(dists[to], dists[from] + length);
@@ -115,19 +113,21 @@ pair<vector<ll>, vector<ll>> bellman_ford(const Graph& graph, const vector<ll>& 
 	return { dists, prev_vertices };
 }
 
+pair<vector<ll>, vector<ll>> bellman_ford(const Graph<ll>& graph, ll s = 0LL)
+{
+	return bellman_ford(graph, s, graph.vertex_count);
+}
+
 // 始点 s から各点への最短距離を返します。
 // パス自体が存在しない場合は -1 を返します。
 // 距離 lengths の各要素は非負である必要があります。
-pair<vector<ll>, vector<ll>> dijkstra(const Graph& graph, const vector<ll>& lengths, ll s = 0LL)
+pair<vector<ll>, vector<ll>> dijkstra(const Graph<ll>& graph, ll s = 0LL)
 {
 	using Vertex = ll;
 	using Length = ll;
 
-	if (graph.edges.size() != lengths.size())
-		throw runtime_error("グラフの辺の要素数と辺の長さの要素数は一致している必要があります。");
-
 	// 辺の隣接リストを作成
-	auto adjacency_list = graph.get_adjacency_list(lengths);
+	auto adjacency_list = graph.get_adjacency_list();
 
 	// アルゴリズム本体
 	using VertexInfo = pair<Length, Vertex>;
@@ -138,17 +138,16 @@ pair<vector<ll>, vector<ll>> dijkstra(const Graph& graph, const vector<ll>& leng
 	dists[s] = 0LL;
 	queue.emplace(dists[s], s);
 	prev_vertices[s] = s;
+	Vertex v, from, to;
+	Length l, length;
 	while (!queue.empty())
 	{
-		Length l;
-		Vertex v;
 		tie(l, v) = queue.top();
 		queue.pop();
 		if (dists[v] < l) continue;
 		for (auto& edge : adjacency_list[v])
 		{
-			Vertex to = get<1>(edge);
-			Length length = get<2>(edge);
+			tie(from, to, length) = edge;
 			if (dists[to] > dists[v] + length)
 			{
 				dists[to] = dists[v] + length;
@@ -168,9 +167,9 @@ pair<vector<ll>, vector<ll>> dijkstra(const Graph& graph, const vector<ll>& leng
 
 // 始点 s から終点 t への最大フローを返します。
 // 距離 capacities の各要素は非負である必要があります。
-ll edmonds_karp(const Graph& graph, const vector<ll>& capacities, ll s, ll t)
+ll edmonds_karp(const Graph<ll>& graph, ll s, ll t)
 {
-	using Capacity =ll;
+	using Capacity = ll;
 	using Vertex = ll;
 	using Index = ll;
 	struct _Edge
@@ -182,23 +181,20 @@ ll edmonds_karp(const Graph& graph, const vector<ll>& capacities, ll s, ll t)
 		_Edge(Vertex from, Vertex to, Capacity capacity, Index reverse_index) :
 			from(from), to(to), capacity(capacity), reverse_index(reverse_index) {}
 	};
-
+ 
 	if (s == t)
 		throw runtime_error("フローの始点と終点は異なっている必要があります。");
-
-	if (graph.edges.size() != capacities.size())
-		throw runtime_error("グラフの辺の要素数と辺の容量の要素数は一致している必要があります。");
-
+ 
 	// 辺の隣接リストを作成
 	vector<vector<_Edge>> edges(graph.vertex_count);
+	Vertex from, to;
+	Capacity capacity;
 	for (ll i = 0; i < graph.edges.size(); ++i)
 	{
-		Vertex from, to;
-		tie(from, to) = graph.edges[i];
-		Capacity capacity = capacities[i];
+		tie(from, to, capacity) = graph.edges[i];
 		if (capacity < 0)
 			throw runtime_error("グラフの辺の容量は非負である必要があります。");
-
+ 
 		edges[from].emplace_back(from, to, capacity, -1LL);
 		edges[to].emplace_back(to, from, 0LL, -1LL);
 		edges[from].back().reverse_index = static_cast<ll>(edges[to].size()) - 1LL;
@@ -207,7 +203,7 @@ ll edmonds_karp(const Graph& graph, const vector<ll>& capacities, ll s, ll t)
 	auto get_reverse_edge = [&edges](_Edge edge) -> auto & {
 		return edges[edge.to][edge.reverse_index];
 	};
-
+ 
 	// アルゴリズム本体
 	ll max_flow = 0LL;
 	while (true)
@@ -215,7 +211,7 @@ ll edmonds_karp(const Graph& graph, const vector<ll>& capacities, ll s, ll t)
 		// BFS
 		queue<Vertex> queue;
 		vector<_Edge*> prev_vertices(graph.vertex_count, nullptr);
-
+ 
 		queue.emplace(s);
 		while (prev_vertices[t] == nullptr && !queue.empty())
 		{
@@ -228,10 +224,10 @@ ll edmonds_karp(const Graph& graph, const vector<ll>& capacities, ll s, ll t)
 				queue.emplace(edge.to);
 			}
 		}
-
+ 
 		// 最小パスがなければループを抜ける
 		if (prev_vertices[t] == nullptr) break;
-
+ 
 		// 最小パスを見つける
 		stack<_Edge*> path;
 		Capacity min_capacity = 1LL << 60;
@@ -242,7 +238,7 @@ ll edmonds_karp(const Graph& graph, const vector<ll>& capacities, ll s, ll t)
 			path.emplace(prev_vertices[path.top()->from]);
 		}
 		min_capacity = min(min_capacity, path.top()->capacity);
-
+ 
 		// Capacity を更新
 		while (!path.empty())
 		{
@@ -251,50 +247,42 @@ ll edmonds_karp(const Graph& graph, const vector<ll>& capacities, ll s, ll t)
 			edge.capacity -= min_capacity;
 			get_reverse_edge(edge).capacity += min_capacity;
 		}
-
+ 
 		max_flow += min_capacity;
 	}
-
+ 
 	return max_flow;
 }
 
-ll edmonds_karp(const Graph& graph, const vector<ll>& capacities)
-{
-	return edmonds_karp(graph, capacities, 0LL, graph.vertex_count - 1LL);
-}
-
 template<class EdgeInfo>
-pair<Graph, vector<EdgeInfo>> get_rooted_bfs_tree_graph(const Graph& graph, vector<EdgeInfo>& infos, ll r = 0LL)
+Graph<EdgeInfo> get_rooted_bfs_tree_graph(const Graph<EdgeInfo>& graph, ll r = 0LL)
 {
-	Graph rooted_tree(graph.vertex_count);
-	auto adjacency_list = graph.get_adjacency_list(infos);
-
-	vector<EdgeInfo> new_infos;
+	Graph<EdgeInfo> rooted_tree(graph.vertex_count);
+	auto adjacency_list = graph.get_adjacency_list();
 
 	queue<ll> queue;
 	vector<bool> have_checked(graph.vertex_count);
 
 	queue.push(r);
 	have_checked[r] = true;
+	ll from, to;
+	EdgeInfo info;
 	while (!queue.empty())
 	{
-		ll from = queue.front();
+		from = queue.front();
 		queue.pop();
 		for (auto& edge : adjacency_list[from])
 		{
-			ll to;
-			EdgeInfo info;
 			tie(from, to, info) = edge;
 			if (have_checked[to])
 				continue;
-			rooted_tree.add_edge({ from, to });
-			new_infos.emplace_back(info);
+			rooted_tree.add_edge(from, to, info);
 			queue.push(to);
 			have_checked[to] = true;
 		}
 	}
 
-	return { rooted_tree, new_infos };
+	return rooted_tree;
 }
 
 class TreeLCACalculator
@@ -320,13 +308,15 @@ public:
 		parent_by_power2[s].resize(log_n + 2LL, s);
 		have_checked[s] = true;
 
+		ll from, to;
 		while (!queue.empty())
 		{
-			ll from = queue.front();
+			from = queue.front();
 			queue.pop();
 
-			for (auto& to : edges[from])
+			for (auto& edge : edges[from])
 			{
+				to = edge;
 				if (have_checked[to])
 					continue;
 
@@ -390,21 +380,21 @@ public:
 
 template<class EdgeInfo>
 pair<vector<pair<tuple<ll, ll, EdgeInfo>, string>>, vector<pair<ll, ll>>>
-get_euler_tour(const Graph& rooted_tree, const vector<EdgeInfo>& edge_infos, ll r)
+get_euler_tour(const Graph<EdgeInfo>& rooted_tree, ll r)
 {
 	using Vertex = ll;
-	using EdgeWithInfo = tuple<Vertex, Vertex, EdgeInfo>;
-	auto adjacent_list = rooted_tree.get_adjacency_list(edge_infos);
+	using Edge = tuple<Vertex, Vertex, EdgeInfo>;
+	auto adjacent_list = rooted_tree.get_adjacency_list();
 
 	// DFS
 	struct EulerTourCalculator
 	{
-		const vector<vector<EdgeWithInfo>> adjacency_list;
+		const vector<vector<Edge>> adjacency_list;
 		vector<bool> have_checked;
-		vector<EdgeWithInfo> prev_edges;
-		vector<pair<EdgeWithInfo, string>> euler_tour;
+		vector<Edge> prev_edges;
+		vector<pair<Edge, string>> euler_tour;
 
-		EulerTourCalculator(const vector<vector<EdgeWithInfo>>& adjacency_list, ll r) :
+		EulerTourCalculator(const vector<vector<Edge>>& adjacency_list, ll r) :
 			adjacency_list(adjacency_list),
 			have_checked(adjacency_list.size(), false),
 			prev_edges(adjacency_list.size())
@@ -434,12 +424,13 @@ get_euler_tour(const Graph& rooted_tree, const vector<EdgeInfo>& edge_infos, ll 
 	};
 
 	auto euler_tour = EulerTourCalculator(adjacent_list, r).euler_tour;
+	euler_tour.pop_back();
 
 	vector<pair<ll, ll>> tour_index(rooted_tree.vertex_count, { -1, -1 });
 	tour_index[r].first = 0LL;
 	for (ll i = 0; i < euler_tour.size(); ++i)
 	{
-		EdgeWithInfo edge;
+		Edge edge;
 		string type;
 		tie(edge, type) = euler_tour[i];
 		ll from = get<0>(edge), to = get<1>(edge);
