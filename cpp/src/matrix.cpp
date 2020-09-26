@@ -36,10 +36,6 @@ using comp = complex<double>;
 
 static const double PI = 3.14;
 
-template <class Integer, unsigned int row, unsigned int col> class Matrix;
-template <class Integer, unsigned int row, unsigned int col>
-std::ostream& operator<<(std::ostream& lhs, const Matrix<Integer, row, col>& rhs);
-
 template <class Integer, unsigned int row, unsigned int col>
 class Matrix {
 protected:
@@ -66,8 +62,6 @@ public:
 	{
 		return values_[rowIndex * col + colIndex];
 	}
-
-	friend std::ostream& operator<< <>(std::ostream& lhs, const Matrix& rhs);
 };
 
 template<class Integer, unsigned int row, unsigned int col>
@@ -133,35 +127,18 @@ inline Matrix<Integer, row, col> operator*(Integer a, const Matrix<Integer, row,
 template <class Integer, unsigned int row, unsigned int col>
 std::ostream& operator<<(std::ostream& lhs, const Matrix<Integer, row, col>& rhs)
 {
-	for (ll i = 0; i < rhs.get_row_size(); ++i)
-	{
-		if (i == 0)
-		{
-			lhs << "[";
-		}
-		else
-		{
-			lhs << " ";
-		}
+	for (ll i = 0; i < rhs.get_row_size(); ++i) {
+		if (i == 0) lhs << "[";
+		else lhs << " ";
 
 		lhs << "[";
-		for (ll j = 0; j < rhs.get_col_size(); ++j)
-		{
-			lhs << rhs.values_[i * rhs.get_col_size() + j];
-			if (j + 1 < rhs.get_col_size())
-			{
-				lhs << ", ";
-			}
+		for (ll j = 0; j < rhs.get_col_size(); ++j) {
+			lhs << rhs(i, j);
+			if (j + 1 < rhs.get_col_size()) lhs << ", ";
 		}
 
-		if (i + 1 < rhs.get_row_size())
-		{
-			lhs << "]," << endl;
-		}
-		else
-		{
-			lhs << "]]";
-		}
+		if (i + 1 < rhs.get_row_size()) lhs << "]," << endl;
+		else lhs << "]]" << endl;
 	}
 	return lhs;
 }
