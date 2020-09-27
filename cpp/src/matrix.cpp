@@ -138,7 +138,7 @@ std::ostream& operator<<(std::ostream& lhs, const Matrix<Integer, row, col>& rhs
 		}
 
 		if (i + 1 < rhs.get_row_size()) lhs << "]," << endl;
-		else lhs << "]]" << endl;
+		else lhs << "]]";
 	}
 	return lhs;
 }
