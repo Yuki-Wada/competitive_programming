@@ -33,8 +33,6 @@ using namespace std;
 using ll = long long;
 using ull = unsigned long long;
 
-static const ll MOD = 1000000007LL;
-
 template<class Integer>
 Integer getModValue(const Integer& n, Integer mod)
 {
@@ -45,10 +43,7 @@ Integer getModValue(const Integer& n, Integer mod)
 template<class Integer>
 inline pair<Integer, Integer> getBezoutsIdentitySolution(Integer a, Integer b)
 {
-	if (b == 0)
-	{
-		return { 1, 0 };
-	}
+	if (b == Integer(0)) return { Integer(1) / a, Integer(0) };
 	auto sol = getBezoutsIdentitySolution(b, a % b);
 	return { sol.second, sol.first - (a / b) * sol.second };
 }
@@ -58,10 +53,6 @@ template<class Integer>
 inline Integer getModInverse(const Integer& n, Integer mod)
 {
 	auto sol = getBezoutsIdentitySolution(n, mod);
-	if (n * sol.first + mod * sol.second != 1)
-	{
-		return -1;
-	}
 	return getModValue(sol.first, mod);
 }
 
@@ -83,11 +74,12 @@ private:
 	Integer mod_;
 	Integer n_;
 public:
+	static Integer default_mod;
 	Integer n() const { return n_; }
 	Integer mod() const { return mod_; }
 
-	ResidueInteger() : mod_(MOD), n_(getModValue(0, mod_)) {}
-	ResidueInteger(Integer n) : mod_(MOD), n_(getModValue(n, mod_)) {}
+	ResidueInteger() : mod_(default_mod), n_(getModValue(Integer(0), mod_)) {}
+	ResidueInteger(Integer n) : mod_(default_mod), n_(getModValue(n, mod_)) {}
 	ResidueInteger(Integer n, Integer mod) : mod_(mod), n_(getModValue(n, mod_)) {}
 
 	friend ResidueInteger& operator+= <>(ResidueInteger& lhs, const ResidueInteger& rhs);
