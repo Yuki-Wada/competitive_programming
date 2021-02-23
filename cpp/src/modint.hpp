@@ -38,24 +38,21 @@ using ull = unsigned long long;
 
 static const ll MOD = 1000000007LL;
 
-template<class Integer>
-Integer getModValue(const Integer& n, Integer mod)
+ll getModValue(const ll& n, ll mod)
 {
 	return (n % mod + mod) % mod;
 }
 
 // computational complexity: o(log(max(a, b)))
-template<class Integer>
-inline pair<Integer, Integer> getBezoutsIdentitySolution(Integer a, Integer b)
+inline pair<ll, ll> getBezoutsIdentitySolution(ll a, ll b)
 {
-	if (b == Integer(0)) return { Integer(1) / a, Integer(0) };
+	if (b == ll(0)) return { ll(1) / a, ll(0) };
 	auto sol = getBezoutsIdentitySolution(b, a % b);
 	return { sol.second, sol.first - (a / b) * sol.second };
 }
 
 // computational complexity: o(log(max(n, mod)))
-template<class Integer>
-inline Integer getModInverse(const Integer& n, Integer mod)
+inline ll getModInverse(const ll& n, ll mod)
 {
 	auto sol = getBezoutsIdentitySolution(n, mod);
 	return getModValue(sol.first, mod);
@@ -141,5 +138,3 @@ vector<rll> get_exclamations(ull n) {
 
 	return exclamations;
 }
-
-#endif

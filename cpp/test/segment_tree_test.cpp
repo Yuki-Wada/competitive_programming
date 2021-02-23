@@ -5,7 +5,7 @@
 #include <string>
 #include <data_structure.hpp>
 
-// computational complexity: o(log(max(a, b))) 
+// computational complexity: o(log(max(a, b)))
 inline ull get_gcd(ull a, ull b)
 {
 	if (b == 0)
@@ -37,7 +37,7 @@ TEST_CASE("Segment Tree Test", "[sample]")
 
 		ll N, M;
 		inputs >> N >> M;
-		
+
 		RMQ min_tree(N + 1);
 		SegmentTree<pair<ll, ll>, GCDOp> gcd_tree(N + 1);
 		ll a;
@@ -77,7 +77,7 @@ TEST_CASE("Segment Tree Test", "[sample]")
 
 		ll N, M;
 		inputs >> N >> M;
-		
+
 		RMQ min_tree(N + 1);
 		ll a;
 		for (unsigned i = 0; i < N; ++i) {
@@ -93,16 +93,4 @@ TEST_CASE("Segment Tree Test", "[sample]")
 			REQUIRE(min_tree.query(l, r + 1) == ans);
 		}
 	}
-}
-
-
-int f()
-{
-    return 1;
-}
- 
-TEST_CASE("Test", "[sample]")
-{
-    CHECK( f() == 2);
-    REQUIRE( f() >= 0 );
 }
