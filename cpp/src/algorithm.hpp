@@ -93,7 +93,7 @@ inline ull get_specified_bit(ull a, ull bit)
 	return (a >> bit) & 1LL;
 }
 
-// computational complexity: o(log(max(a, b))) 
+// computational complexity: o(log(max(a, b)))
 inline ull get_gcd(ull a, ull b)
 {
 	if (b == 0)
@@ -103,7 +103,7 @@ inline ull get_gcd(ull a, ull b)
 	return get_gcd(b, a % b);
 }
 
-template<class Integer>
+template <class Integer>
 inline Integer get_power(Integer base, ull exponential)
 {
 	Integer result = 1;
@@ -120,21 +120,29 @@ inline Integer get_power(Integer base, ull exponential)
 	return result;
 }
 
-vector<vector<ll>> enumerate_combination(ll n, ll k) {
-	if (n == 0) return {};
-	if (k == 0) return {};
-	if (n < k) return {};
+vector<vector<ll>> enumerate_combination(ll n, ll k)
+{
+	if (n == 0)
+		return {};
+	if (k == 0)
+		return {};
+	if (n < k)
+		return {};
 
 	vector<vector<ll>> res;
-	if (k == 1) {
-		for (ll i = 0; i < n; ++i) {
+	if (k == 1)
+	{
+		for (ll i = 0; i < n; ++i)
+		{
 			res.emplace_back(vector<ll>(1, i));
 		}
 		return res;
 	}
-	if (n == k) {
+	if (n == k)
+	{
 		vector<ll> v(n);
-		for (ll i = 0; i < n; ++i) {
+		for (ll i = 0; i < n; ++i)
+		{
 			v[i] = i;
 		}
 		res.emplace_back(v);
@@ -143,7 +151,8 @@ vector<vector<ll>> enumerate_combination(ll n, ll k) {
 	res = enumerate_combination(n - 1, k);
 	vector<vector<ll>> pre = enumerate_combination(n - 1, k - 1);
 	res.reserve(res.size() + pre.size());
-	for (ll i = 0; i < pre.size(); ++i) {
+	for (ll i = 0; i < pre.size(); ++i)
+	{
 		pre[i].emplace_back(n - 1);
 	}
 	copy(pre.begin(), pre.end(), std::back_inserter(res));
@@ -151,13 +160,11 @@ vector<vector<ll>> enumerate_combination(ll n, ll k) {
 	return res;
 }
 
-ll get_lis_length(const vector<ll>& seq, bool strictly = true, bool ascending = true)
+ll get_lis_length(const vector<ll> &seq, bool strictly = true, bool ascending = true)
 {
-
 	vector<ll> min_last_seq_elem;
 	using iter_type = decltype(min_last_seq_elem.begin());
-	auto get_iter = [&strictly, &ascending](iter_type begin, iter_type end, ll elem)
-	{
+	auto get_iter = [&strictly, &ascending](iter_type begin, iter_type end, ll elem) {
 		if (strictly)
 		{
 			if (ascending)
@@ -174,7 +181,7 @@ ll get_lis_length(const vector<ll>& seq, bool strictly = true, bool ascending = 
 		}
 	};
 
-	for (const auto& elem : seq)
+	for (const auto &elem : seq)
 	{
 		auto iter = get_iter(min_last_seq_elem.begin(), min_last_seq_elem.end(), elem);
 		if (iter == min_last_seq_elem.end())
@@ -186,12 +193,11 @@ ll get_lis_length(const vector<ll>& seq, bool strictly = true, bool ascending = 
 	return min_last_seq_elem.size();
 }
 
-vector<ll> get_lis(const vector<ll>& seq, bool strictly = true, bool ascending = true)
+vector<ll> get_lis(const vector<ll> &seq, bool strictly = true, bool ascending = true)
 {
 	vector<ll> min_last_seq_elem;
 	using iter_type = decltype(min_last_seq_elem.begin());
-	auto get_iter = [&strictly, &ascending](iter_type begin, iter_type end, ll elem)
-	{
+	auto get_iter = [&strictly, &ascending](iter_type begin, iter_type end, ll elem) {
 		if (strictly)
 		{
 			if (ascending)
@@ -211,8 +217,7 @@ vector<ll> get_lis(const vector<ll>& seq, bool strictly = true, bool ascending =
 	vector<ll> update_pos;
 	update_pos.reserve(seq.size());
 
-
-	for (const auto& elem : seq)
+	for (const auto &elem : seq)
 	{
 		auto iter = get_iter(min_last_seq_elem.begin(), min_last_seq_elem.end(), elem);
 
@@ -232,7 +237,7 @@ vector<ll> get_lis(const vector<ll>& seq, bool strictly = true, bool ascending =
 	res.reserve(min_last_seq_elem.size());
 	for (ll i = 0; i < update_pos.size(); ++i)
 	{
-		const auto& pos = update_pos[i];
+		const auto &pos = update_pos[i];
 		if (pos == -1)
 		{
 			res.emplace_back(seq[i]);
@@ -243,10 +248,34 @@ vector<ll> get_lis(const vector<ll>& seq, bool strictly = true, bool ascending =
 		}
 	}
 
-	return move(res);
+	return res;
 }
 
-vector<ll> z_algorithm(string S) {
+ll floor_sum(ll n, ll m, ll a, ll b)
+{
+	ll ans = 0;
+	if (a >= m)
+	{
+		ans += (n - 1LL) * n * (a / m) / 2LL;
+		a %= m;
+	}
+	if (b >= m)
+	{
+		ans += n * (b / m);
+		b %= m;
+	}
+
+	ll y_max = (a * n + b) / m, x_max = (y_max * m - b);
+	if (y_max == 0LL)
+		return ans;
+
+	ans += (n - (x_max + a - 1Ll) / a) * y_max;
+	ans += floor_sum(y_max, a, m, (a - x_max % a) % a);
+	return ans;
+}
+
+vector<ll> z_algorithm(string S)
+{
 	vector<ll> As(S.size());
 
 	if (S.size() == 0)
@@ -275,12 +304,15 @@ vector<ll> z_algorithm(string S) {
 	return As;
 }
 
-ll boyer_moore_algorithm(const vector<ll>& pattern, const vector<ll>& str) {
+ll boyer_moore_algorithm(const vector<ll> &pattern, const vector<ll> &str)
+{
 	map<ll, ll> shift;
 	ll pattern_idx;
-	for (ll i = 0; i < pattern.size(); ++i) {
+	for (ll i = 0; i < pattern.size(); ++i)
+	{
 		pattern_idx = pattern.size() - 1 - i;
-		if (shift.count(shift[pattern[pattern_idx]]) == 0) {
+		if (shift.count(shift[pattern[pattern_idx]]) == 0)
+		{
 			shift[pattern[pattern_idx]] = i;
 		}
 	}
@@ -288,31 +320,40 @@ ll boyer_moore_algorithm(const vector<ll>& pattern, const vector<ll>& str) {
 	ll base_idx = pattern.size() - 1;
 	ll curr_idx = base_idx;
 	bool found = false;
-	while (base_idx < str.size()) {
-		for (ll i = 0; i < pattern.size(); ++i) {
+	while (base_idx < str.size())
+	{
+		for (ll i = 0; i < pattern.size(); ++i)
+		{
 			curr_idx = base_idx - i;
 			pattern_idx = pattern.size() - 1 - i;
 
-			if (pattern[pattern_idx] != str[curr_idx]) {
-				if (shift.count(str[curr_idx]) == 0) {
+			if (pattern[pattern_idx] != str[curr_idx])
+			{
+				if (shift.count(str[curr_idx]) == 0)
+				{
 					curr_idx += pattern.size();
 				}
-				else {
+				else
+				{
 					curr_idx += shift[str[curr_idx]];
 				}
-				if (base_idx >= curr_idx) {
+				if (base_idx >= curr_idx)
+				{
 					++base_idx;
 				}
-				else {
+				else
+				{
 					base_idx = curr_idx;
 				}
 				break;
 			}
-			if (i + 1 == pattern.size()) {
+			if (i + 1 == pattern.size())
+			{
 				found = true;
 			}
 		}
-		if (found) {
+		if (found)
+		{
 			return curr_idx;
 		}
 	}
@@ -320,49 +361,62 @@ ll boyer_moore_algorithm(const vector<ll>& pattern, const vector<ll>& str) {
 	return -1;
 }
 
-bool visit(ll node, const vector<vector<ll>>& edges, vector<ll>& status, vector<ll>& result) {
-	if (status[node] == 1) return true;
-	if (status[node] == 0) {
-		status[node] = 1;
-		for (ll i = 0; i < edges[node].size(); ++i) {
-			if (visit(edges[node][i], edges, status, result)) return false;
+pair<bool, vector<ll>> topological_sort(const vector<vector<ll>> &edges)
+{
+	struct DFS
+	{
+		static bool visit(ll node, const vector<vector<ll>> &edges, vector<ll> &status, vector<ll> &result)
+		{
+			if (status[node] == 1)
+				return false;
+			if (status[node] == 0)
+			{
+				status[node] = 1;
+				for (ull i = 0; i < edges[node].size(); ++i)
+				{
+					if (!visit(edges[node][i], edges, status, result))
+						return false;
+				}
+				status[node] = 2;
+				result.emplace_back(node);
+			}
+
+			return true;
 		}
-		status[node] = 2;
-		result.emplace_back(node);
-	}
+	};
 
-	return true;
-}
-
-bool topological_sort(const vector<vector<ll>>& edges, vector<ll>& result) {
+	vector<ll> result;
 	vector<ll> status(edges.size());
-	for (ll i = 0; i < edges.size(); ++i) {
-		if (status[i] == 0 && !visit(i, edges, status, result)) return false;
+	for (ull i = 0; i < edges.size(); ++i)
+	{
+		if (status[i] == 0 && !DFS::visit(i, edges, status, result))
+			return make_pair(false, vector<ll>());
 	}
 	reverse(result.begin(), result.end());
-	return true;
+
+	return make_pair(true, result);
 }
 
-vector<comp> fft(const vector<comp>& function)
+void fft_impl(
+	const vector<comp> &function,
+	vector<comp> &transformed,
+	vector<comp> &stored,
+	ll start,
+	ll skip)
 {
-	ll degree = function.size();
-	if (degree == 0LL)
-		throw runtime_error("配列の要素数は 1 以上である必要があります。");
-	if ((degree & (degree - 1LL)) != 0LL)
-		throw runtime_error("配列の要素数は 2 のべき乗である必要があります。");
-
+	ll degree = function.size() / skip;
 	if (degree == 1LL)
-		return { function[0] };
-
-	vector<comp> function0(degree / 2LL);
-	vector<comp> function1(degree / 2LL);
-	for (ll i = 0; i < degree / 2LL; ++i)
 	{
-		function0[i] = function[i * 2LL];
-		function1[i] = function[i * 2LL + 1LL];
+		transformed[start] = function[start];
+		return;
 	}
-	function0 = fft(function0);
-	function1 = fft(function1);
+
+	fft_impl(function, transformed, stored, start, skip * 2LL);
+	fft_impl(function, transformed, stored, start + skip, skip * 2LL);
+	for (ll i = 0; i < degree; ++i)
+	{
+		stored[start + skip * i] = transformed[start + skip * i];
+	}
 
 	const comp xi = exp(comp(0.0, -2.0 * PI / static_cast<double>(degree)));
 	comp power_of_xi(1.0, 0.0);
@@ -370,41 +424,93 @@ vector<comp> fft(const vector<comp>& function)
 	for (ll i = 0; i < degree; ++i)
 	{
 		auto res_i = i % (degree / 2LL);
-		transformed_function[i] = function0[res_i] + function1[res_i] * power_of_xi;
+		transformed[start + skip * i] = stored[start + skip * res_i * 2LL] + stored[start + skip * (res_i * 2LL + 1LL)] * power_of_xi;
 		power_of_xi *= xi;
 	}
-
-	return move(transformed_function);
 }
 
-vector<comp> inv_fft(const vector<comp>& function)
+vector<comp> fft(const vector<comp> &function)
+{
+	ll degree = function.size();
+	if (degree == 0LL)
+		throw runtime_error("配列の要素数は 1 以上である必要があります。");
+	if ((degree & (degree - 1LL)) != 0LL)
+		throw runtime_error("配列の要素数は 2 のべき乗である必要があります。");
+
+	vector<comp> transformed(degree, 0);
+	vector<comp> stored(degree, 0);
+	fft_impl(function, transformed, stored, 0LL, 1LL);
+
+	return transformed;
+}
+
+vector<comp> inv_fft(const vector<comp> &function)
 {
 	vector<comp> conj_function(function.size());
-	for (ll i = 0; i < function.size(); ++i)
+	for (ull i = 0; i < function.size(); ++i)
 	{
 		conj_function[i] = conj(function[i]);
 	}
 
 	conj_function = fft(move(conj_function));
 
-	for (ll i = 0; i < function.size(); ++i)
+	for (ull i = 0; i < function.size(); ++i)
 	{
 		conj_function[i] = conj(conj_function[i]) / static_cast<comp>(function.size());
 	}
 
-	return move(conj_function);
+	return conj_function;
 }
 
-ll default_number_theoretic_transform_mod = 998244353LL; // 998244353 = 119 * 2^23 + 1
+ll default_number_theoretic_transform_mod = 998244353LL;	// 998244353 = 119 * 2^23 + 1
 ll default_number_theoretic_transform_primitive_root = 3LL; // primitive root of 998244353
 
-vector<ll> fmt(
-	const vector<ll>& function,
-	ll mod = default_number_theoretic_transform_mod,
-	ll primitive_root = default_number_theoretic_transform_primitive_root
-)
+// Fast Modulo Transform
+void fmt_impl(
+	const vector<ll> &function,
+	vector<ll> &transformed,
+	vector<ll> &stored,
+	ll start,
+	ll skip,
+	ll mod,
+	ll xi)
 {
-	ll degree = function.size();
+	ll degree = function.size() / skip;
+
+	if (degree == 1LL)
+	{
+		transformed[start] = function[start];
+		return;
+	}
+
+	auto get_mod = [&](const ll &n) {
+		return (n % mod + mod) % mod;
+	};
+
+	fmt_impl(function, transformed, stored, start, skip * 2LL, mod, get_mod(xi * xi));
+	fmt_impl(function, transformed, stored, start + skip, skip * 2LL, mod, get_mod(xi * xi));
+	for (ll i = 0; i < degree; ++i)
+	{
+		stored[start + skip * i] = transformed[start + skip * i];
+	}
+
+	ll power_of_xi = 1;
+	for (ll i = 0; i < degree; ++i)
+	{
+		auto res_i = i % (degree / 2LL);
+		transformed[start + skip * i] = stored[start + skip * res_i * 2LL] + stored[start + skip * (res_i * 2LL + 1LL)] * power_of_xi;
+		power_of_xi *= xi;
+		transformed[start + skip * i] = get_mod(transformed[start + skip * i]);
+		power_of_xi = get_mod(power_of_xi);
+	}
+}
+
+vector<ll> fmt(
+	const vector<ll> &function,
+	ll mod = default_number_theoretic_transform_mod,
+	ll primitive_root = default_number_theoretic_transform_primitive_root)
+{
+	auto degree = function.size();
 	if (degree == 0LL)
 		throw runtime_error("配列の要素数は 1 以上である必要があります。");
 	if ((degree & (degree - 1LL)) != 0LL)
@@ -412,26 +518,14 @@ vector<ll> fmt(
 	if ((mod - 1LL) % degree != 0LL)
 		throw runtime_error("mod - 1 は配列の要素数で割り切れる必要があります。");
 
-	if (degree == 1LL)
-		return { function[0] };
+	vector<ll> transformed(degree, 0);
+	vector<ll> stored(degree, 0);
 
-	auto get_mod = [&](const ll& n){
+	auto get_mod = [&](const ll &n) {
 		return (n % mod + mod) % mod;
 	};
 
-	vector<ll> function0(degree / 2LL);
-	vector<ll> function1(degree / 2LL);
-	for (ll i = 0; i < degree / 2LL; ++i)
-	{
-		function0[i] = function[i * 2LL];
-		function1[i] = function[i * 2LL + 1LL];
-		function0[i] = get_mod(function0[i]);
-		function1[i] = get_mod(function1[i]);
-	}
-	function0 = fmt(function0, mod, primitive_root);
-	function1 = fmt(function1, mod, primitive_root);
-
-	auto get_mod_power = [&](ll base, ull exponential){
+	auto get_mod_power = [&](ll base, ull exponential) {
 		ll result = 1;
 		while (exponential >= 1)
 		{
@@ -447,41 +541,30 @@ vector<ll> fmt(
 
 		return result;
 	};
-
-	const ll xi = get_mod_power(primitive_root, (mod - 1LL) / degree);
-	ll power_of_xi = 1;
-	vector<ll> transformed_function(degree);
-	for (ll i = 0; i < degree; ++i)
-	{
-		auto res_i = i % (degree / 2LL);
-		transformed_function[i] = function0[res_i] + function1[res_i] * power_of_xi;
-		power_of_xi *= xi;
-		transformed_function[i] = get_mod(transformed_function[i]);
-		power_of_xi = get_mod(power_of_xi);
-	}
-
-	return move(transformed_function);
+	ll xi = get_mod_power(primitive_root, (mod - 1LL) / degree);
+	fmt_impl(function, transformed, stored, 0LL, 1LL, mod, xi);
+	return transformed;
 }
-
 vector<ll> inv_fmt(
-	const vector<ll>& function,
+	const vector<ll> &function,
 	ll mod = default_number_theoretic_transform_mod,
-	ll primitive_root = default_number_theoretic_transform_primitive_root
-)
+	ll primitive_root = default_number_theoretic_transform_primitive_root)
 {
-	auto get_mod = [&](const ll& n){
+	auto get_mod = [&](const ll &n) {
 		return (n % mod + mod) % mod;
 	};
 
-	auto get_mod_inverse = [&](const ll& n, ll mod) -> ll{
-		struct BezoutsIdentitySolver {
-			static pair<ll, ll> execute(ll a, ll b) {
+	auto get_mod_inverse = [&](const ll &n, ll mod) -> ll {
+		struct BezoutsIdentitySolver
+		{
+			static pair<ll, ll> execute(ll a, ll b)
+			{
 				if (b == 0)
 				{
-					return { 1, 0 };
+					return {1, 0};
 				}
 				auto sol = execute(b, a % b);
-				return { sol.second, sol.first - (a / b) * sol.second };
+				return {sol.second, sol.first - (a / b) * sol.second};
 			}
 		};
 		auto sol = BezoutsIdentitySolver::execute(n, mod);
@@ -492,16 +575,16 @@ vector<ll> inv_fmt(
 		return get_mod(sol.first);
 	};
 
-	auto inverse_primitive_root =  get_mod_inverse(primitive_root, mod);
-	vector<ll> transformed_function = fmt(
+	auto inverse_primitive_root = get_mod_inverse(primitive_root, mod);
+	vector<ll> transformed = fmt(
 		function, mod, inverse_primitive_root);
 	auto inverse_n = get_mod_inverse(function.size(), mod);
-	for (ll i = 0; i < function.size(); ++i)
+	for (ull i = 0; i < function.size(); ++i)
 	{
-		transformed_function[i] = get_mod(transformed_function[i] * inverse_n);
+		transformed[i] = get_mod(transformed[i] * inverse_n);
 	}
 
-	return move(transformed_function);
+	return transformed;
 }
 
 #endif
