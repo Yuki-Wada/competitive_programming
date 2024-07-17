@@ -1,7 +1,7 @@
 #ifndef __ALGORITHM_HPP__
 #define __ALGORITHM_HPP__ 0
 
-//include
+// include
 //------------------------------------------
 #include <vector>
 #include <list>
@@ -93,6 +93,29 @@ inline ull get_specified_bit(ull a, ull bit)
 	return (a >> bit) & 1LL;
 }
 
+ll floor_sum(ll n, ll m, ll a, ll b)
+{
+	ll ans = 0;
+	if (a >= m)
+	{
+		ans += (n - 1LL) * n * (a / m) / 2LL;
+		a %= m;
+	}
+	if (b >= m)
+	{
+		ans += n * (b / m);
+		b %= m;
+	}
+
+	ll y_max = (a * n + b) / m, x_max = (y_max * m - b);
+	if (y_max == 0LL)
+		return ans;
+
+	ans += (n - (x_max + a - 1Ll) / a) * y_max;
+	ans += floor_sum(y_max, a, m, (a - x_max % a) % a);
+	return ans;
+}
+
 // computational complexity: o(log(max(a, b)))
 inline ull get_gcd(ull a, ull b)
 {
@@ -164,7 +187,8 @@ ll get_lis_length(const vector<ll> &seq, bool strictly = true, bool ascending = 
 {
 	vector<ll> min_last_seq_elem;
 	using iter_type = decltype(min_last_seq_elem.begin());
-	auto get_iter = [&strictly, &ascending](iter_type begin, iter_type end, ll elem) {
+	auto get_iter = [&strictly, &ascending](iter_type begin, iter_type end, ll elem)
+	{
 		if (strictly)
 		{
 			if (ascending)
@@ -197,7 +221,8 @@ vector<ll> get_lis(const vector<ll> &seq, bool strictly = true, bool ascending =
 {
 	vector<ll> min_last_seq_elem;
 	using iter_type = decltype(min_last_seq_elem.begin());
-	auto get_iter = [&strictly, &ascending](iter_type begin, iter_type end, ll elem) {
+	auto get_iter = [&strictly, &ascending](iter_type begin, iter_type end, ll elem)
+	{
 		if (strictly)
 		{
 			if (ascending)
@@ -250,28 +275,70 @@ vector<ll> get_lis(const vector<ll> &seq, bool strictly = true, bool ascending =
 
 	return res;
 }
-
-ll floor_sum(ll n, ll m, ll a, ll b)
+pair<vector<ll>, vector<ll>> compress_coordinates(const vector<ll> &As)
 {
-	ll ans = 0;
-	if (a >= m)
+	ll N = As.size();
+	vector<pair<ll, ll>> items(N);
+	for (ll i = 0; i < N; ++i)
 	{
-		ans += (n - 1LL) * n * (a / m) / 2LL;
-		a %= m;
+		items[i] = make_pair(As[i], i);
 	}
-	if (b >= m)
+	sort(items.begin(), items.end());
+
+	vector<ll> compressed_coords(N);
+	vector<ll> compression_table;
+	ll prev_a = -1;
+	ll compressed = -1;
+	for (ll i = 0; i < N; ++i)
 	{
-		ans += n * (b / m);
-		b %= m;
+		auto [a, idx] = items[i];
+		if (prev_a != a)
+		{
+			compression_table.push_back(a);
+			prev_a = a;
+			++compressed;
+		}
+
+		compressed_coords[idx] = compressed;
 	}
 
-	ll y_max = (a * n + b) / m, x_max = (y_max * m - b);
-	if (y_max == 0LL)
-		return ans;
+	return {compressed_coords, compression_table};
+}
 
-	ans += (n - (x_max + a - 1Ll) / a) * y_max;
-	ans += floor_sum(y_max, a, m, (a - x_max % a) % a);
-	return ans;
+pair<bool, vector<ll>> topological_sort(const vector<vector<ll>> &edges)
+{
+	struct DFS
+	{
+		static bool visit(ll node, const vector<vector<ll>> &edges, vector<ll> &status, vector<ll> &result)
+		{
+			if (status[node] == 1)
+				return false;
+			if (status[node] == 0)
+			{
+				status[node] = 1;
+				for (ull i = 0; i < edges[node].size(); ++i)
+				{
+					if (!visit(edges[node][i], edges, status, result))
+						return false;
+				}
+				status[node] = 2;
+				result.emplace_back(node);
+			}
+
+			return true;
+		}
+	};
+
+	vector<ll> result;
+	vector<ll> status(edges.size());
+	for (ull i = 0; i < edges.size(); ++i)
+	{
+		if (status[i] == 0 && !DFS::visit(i, edges, status, result))
+			return make_pair(false, vector<ll>());
+	}
+	reverse(result.begin(), result.end());
+
+	return make_pair(true, result);
 }
 
 vector<ll> z_algorithm(string S)
@@ -361,40 +428,92 @@ ll boyer_moore_algorithm(const vector<ll> &pattern, const vector<ll> &str)
 	return -1;
 }
 
-pair<bool, vector<ll>> topological_sort(const vector<vector<ll>> &edges)
+vector<ull> construct_suffix_array(const vector<ull> &vec)
 {
-	struct DFS
+	struct DoublingComparer
 	{
-		static bool visit(ll node, const vector<vector<ll>> &edges, vector<ll> &status, vector<ll> &result)
+		static bool compare(ll i, ll j, vector<ll> &ranks, ll K, ll N)
 		{
-			if (status[node] == 1)
-				return false;
-			if (status[node] == 0)
+			if (ranks[i] != ranks[j])
 			{
-				status[node] = 1;
-				for (ull i = 0; i < edges[node].size(); ++i)
-				{
-					if (!visit(edges[node][i], edges, status, result))
-						return false;
-				}
-				status[node] = 2;
-				result.emplace_back(node);
+				return ranks[i] < ranks[j];
 			}
+			ll di = i + K <= N ? ranks[i + K] : -1LL;
+			ll dj = j + K <= N ? ranks[j + K] : -1LL;
 
-			return true;
-		}
+			return di < dj;
+		};
 	};
 
-	vector<ll> result;
-	vector<ll> status(edges.size());
-	for (ull i = 0; i < edges.size(); ++i)
-	{
-		if (status[i] == 0 && !DFS::visit(i, edges, status, result))
-			return make_pair(false, vector<ll>());
-	}
-	reverse(result.begin(), result.end());
+	ll N = vec.size();
+	vector<ull> suffix_array(N + 1LL);
+	vector<ll> ranks(N + 1LL);
 
-	return make_pair(true, result);
+	for (ll i = 0; i <= N; ++i)
+	{
+		suffix_array[i] = i;
+		ranks[i] = i < N ? vec[i] : -1LL;
+	}
+
+	vector<ull> tmp_ranks(N);
+
+	for (ll k = 1; k < N; k *= 2LL)
+	{
+		auto compare = [&ranks, k, N](ll i, ll j)
+		{
+			return DoublingComparer::compare(i, j, ranks, k, N);
+		};
+		sort(suffix_array.begin(), suffix_array.end(), compare);
+
+		tmp_ranks[suffix_array[0]] = 0;
+		for (ll i = 1; i <= N; ++i)
+		{
+			tmp_ranks[suffix_array[i]] = tmp_ranks[suffix_array[i - 1LL]];
+			if (DoublingComparer::compare(suffix_array[i - 1LL], suffix_array[i], ranks, k, N))
+			{
+				++tmp_ranks[suffix_array[i]];
+			}
+		}
+		for (ll i = 0; i <= N; ++i)
+		{
+			ranks[i] = tmp_ranks[i];
+		}
+	}
+	return suffix_array;
+}
+
+vector<ull> construct_lcp(const vector<ull> &vec)
+{
+	ll N = vec.size();
+	vector<ull> lcp(N);
+
+	vector<ull> suffix_array = construct_suffix_array(vec);
+	vector<ull> ranks(N + 1LL);
+	for (ll i = 0; i <= N; ++i)
+	{
+		ranks[suffix_array[i]] = i;
+	}
+
+	lcp[0] = 0;
+	ll h = 0;
+	for (ll i = 0; i < N; ++i)
+	{
+		ll j = suffix_array[ranks[i] - 1LL];
+		if (h > 0LL)
+		{
+			--h;
+		}
+		for (; j + h < N && i + h < N; ++h)
+		{
+			if (vec[j + h] != vec[i + h])
+			{
+				break;
+			}
+		}
+		lcp[ranks[i] - 1LL] = h;
+	}
+
+	return lcp;
 }
 
 void fft_impl(
@@ -483,7 +602,8 @@ void fmt_impl(
 		return;
 	}
 
-	auto get_mod = [&](const ll &n) {
+	auto get_mod = [&](const ll &n)
+	{
 		return (n % mod + mod) % mod;
 	};
 
@@ -521,11 +641,13 @@ vector<ll> fmt(
 	vector<ll> transformed(degree, 0);
 	vector<ll> stored(degree, 0);
 
-	auto get_mod = [&](const ll &n) {
+	auto get_mod = [&](const ll &n)
+	{
 		return (n % mod + mod) % mod;
 	};
 
-	auto get_mod_power = [&](ll base, ull exponential) {
+	auto get_mod_power = [&](ll base, ull exponential)
+	{
 		ll result = 1;
 		while (exponential >= 1)
 		{
@@ -550,11 +672,13 @@ vector<ll> inv_fmt(
 	ll mod = default_number_theoretic_transform_mod,
 	ll primitive_root = default_number_theoretic_transform_primitive_root)
 {
-	auto get_mod = [&](const ll &n) {
+	auto get_mod = [&](const ll &n)
+	{
 		return (n % mod + mod) % mod;
 	};
 
-	auto get_mod_inverse = [&](const ll &n, ll mod) -> ll {
+	auto get_mod_inverse = [&](const ll &n, ll mod) -> ll
+	{
 		struct BezoutsIdentitySolver
 		{
 			static pair<ll, ll> execute(ll a, ll b)

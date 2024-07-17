@@ -1,7 +1,7 @@
 #ifndef __GRAPH_HPP__
 #define __GRAPH_HPP__ 0
 
-//include
+// include
 //------------------------------------------
 #include <vector>
 #include <list>
@@ -60,15 +60,15 @@ struct Graph
 	vector<vector<Edge>> get_adjacency_list() const
 	{
 		// 辺の隣接リストを作成
-		vector<vector<Edge>> adjancency_list(vertex_count);
+		vector<vector<Edge>> adjacency_list(vertex_count);
 		for (ull i = 0; i < edges.size(); ++i)
 		{
 			Vertex from, to;
 			EdgeInfo info;
 			tie(from, to, info) = edges[i];
-			adjancency_list[from].emplace_back(from, to, info);
+			adjacency_list[from].emplace_back(from, to, info);
 		}
-		return adjancency_list;
+		return adjacency_list;
 	}
 
 	vector<vector<Edge>> get_reverse_adjacency_list() const
