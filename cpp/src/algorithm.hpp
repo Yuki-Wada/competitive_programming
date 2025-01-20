@@ -56,41 +56,48 @@ inline ll ceil(ll a, ull b)
 {
 	ll llb = b;
 	if (a >= 0)
-	{
 		return (a + llb - 1) / llb;
-	}
 	else
-	{
 		return -(-a / llb);
-	}
 }
 
-inline ll get_lowest_one_bit(ll a)
+inline ull get_lowest_one_bit(ull a)
 {
 	return a & (-a);
 }
 
-inline ll get_highest_one_bit(ll a)
+inline ull get_highest_one_bit(ull a)
 {
-	while ((a & (a - 1)) != 0)
-	{
-		a = a & (a - 1);
-	}
+	while ((a & (a - 1LL)) != 0)
+		a = a & (a - 1LL);
 	return a;
 }
 
 inline bool is_power2(ull a)
 {
 	if (a == 0)
-	{
 		return false;
-	}
 	return !(a & (a - 1));
 }
 
 inline ull get_specified_bit(ull a, ull bit)
 {
-	return (a >> bit) & 1LL;
+	return (a >> bit) & 1ULL;
+}
+
+inline ll toint(string s)
+{
+	ll v;
+	istringstream sin(s);
+	sin >> v;
+	return v;
+}
+template <class t>
+inline string tostring(t x)
+{
+	ostringstream sout;
+	sout << x;
+	return sout.str();
 }
 
 ll floor_sum(ll n, ll m, ll a, ll b)
@@ -143,7 +150,43 @@ inline Integer get_power(Integer base, ull exponential)
 	return result;
 }
 
-vector<vector<ll>> enumerate_combination(ll n, ll k)
+vector<ull> enumerate_quotients(ull x)
+{
+	if (x == 1ULL)
+	{
+		return {1ULL};
+	}
+
+	ull low = 1LL, high = x, mid = (low + high) / 2LL;
+	while (high - low >= 2LL)
+	{
+		if (mid * mid + mid > x)
+		{
+			high = mid;
+		}
+		else
+		{
+			low = mid;
+		}
+		mid = (low + high) / 2LL;
+	}
+
+	vector<ull> results;
+	results.reserve((low + 1LL) * 2LL);
+	for (ull i = 1; i <= low + 1ULL; ++i)
+	{
+		results.emplace_back(x / i);
+	}
+
+	for (ull i = x / (low + 1ULL) - 1ULL; i >= 1ULL; --i)
+	{
+		results.emplace_back(i);
+	}
+
+	return results;
+}
+
+vector<vector<ll>> enumerate_combination_slow(ll n, ll k)
 {
 	if (n == 0)
 		return {};
@@ -181,6 +224,68 @@ vector<vector<ll>> enumerate_combination(ll n, ll k)
 	copy(pre.begin(), pre.end(), std::back_inserter(res));
 
 	return res;
+}
+
+vector<vector<ll>> enumerate_combination(ll n, ll k)
+{
+	struct CombineImpl
+	{
+		static void execute(ll k, ll start, vector<ll> &elems, vector<ll> &comb, vector<vector<ll>> &combs)
+		{
+			if (comb.size() > k)
+			{
+				throw runtime_error("組合せの長さは k 以下である必要があります。");
+			}
+
+			if (comb.size() == k)
+			{
+				combs.emplace_back(comb);
+				return;
+			}
+
+			for (ll i = start; i < elems.size(); ++i)
+			{
+				if (k + i > ll(comb.size()) + ll(elems.size()))
+				{
+					break;
+				}
+				comb.push_back(elems[i]);
+				CombineImpl::execute(k, i + 1, elems, comb, combs);
+				comb.pop_back();
+			}
+			return;
+		};
+	};
+
+	vector<vector<ll>> combs;
+	vector<ll> comb;
+	vector<ll> elems(n);
+	for (ll i = 0; i < n; ++i)
+	{
+		elems[i] = i;
+	}
+	CombineImpl::execute(k, 0LL, elems, comb, combs);
+	return combs;
+}
+
+vector<vector<ll>> compute_permutations(ll n)
+{
+	vector<ll> nums(n);
+	ll permutation_count = 1LL;
+	for (ll i = 0; i < n; ++i)
+	{
+		nums[i] = i;
+		permutation_count *= n + 1LL;
+	}
+
+	vector<vector<ll>> permutations;
+	permutations.reserve(permutation_count);
+	do
+	{
+		permutations.push_back(nums);
+	} while (next_permutation(nums.begin(), nums.end()));
+
+	return permutations;
 }
 
 ll get_lis_length(const vector<ll> &seq, bool strictly = true, bool ascending = true)
@@ -275,6 +380,7 @@ vector<ll> get_lis(const vector<ll> &seq, bool strictly = true, bool ascending =
 
 	return res;
 }
+
 pair<vector<ll>, vector<ll>> compress_coordinates(const vector<ll> &As)
 {
 	ll N = As.size();
@@ -287,16 +393,17 @@ pair<vector<ll>, vector<ll>> compress_coordinates(const vector<ll> &As)
 
 	vector<ll> compressed_coords(N);
 	vector<ll> compression_table;
-	ll prev_a = -1;
+
+	ll prev_a;
 	ll compressed = -1;
 	for (ll i = 0; i < N; ++i)
 	{
 		auto [a, idx] = items[i];
-		if (prev_a != a)
+		if (i == 0LL || prev_a != a)
 		{
 			compression_table.push_back(a);
-			prev_a = a;
 			++compressed;
+			prev_a = a;
 		}
 
 		compressed_coords[idx] = compressed;
@@ -581,11 +688,11 @@ vector<comp> inv_fft(const vector<comp> &function)
 	return conj_function;
 }
 
-ll default_number_theoretic_transform_mod = 998244353LL;	// 998244353 = 119 * 2^23 + 1
-ll default_number_theoretic_transform_primitive_root = 3LL; // primitive root of 998244353
+ll DEFAULT_NUMBER_THEORETIC_TRANSFORM_MOD = 998244353LL;	// 998244353 = 119 * 2^23 + 1
+ll DEFAULT_NUMBER_THEORETIC_TRANSFORM_PRIMITIVE_ROOT = 3LL; // primitive root of 998244353
 
 // Fast Modulo Transform
-void fmt_impl(
+void fmt_recursive_impl(
 	const vector<ll> &function,
 	vector<ll> &transformed,
 	vector<ll> &stored,
@@ -607,8 +714,8 @@ void fmt_impl(
 		return (n % mod + mod) % mod;
 	};
 
-	fmt_impl(function, transformed, stored, start, skip * 2LL, mod, get_mod(xi * xi));
-	fmt_impl(function, transformed, stored, start + skip, skip * 2LL, mod, get_mod(xi * xi));
+	fmt_recursive_impl(function, transformed, stored, start, skip * 2LL, mod, get_mod(xi * xi));
+	fmt_recursive_impl(function, transformed, stored, start + skip, skip * 2LL, mod, get_mod(xi * xi));
 	for (ll i = 0; i < degree; ++i)
 	{
 		stored[start + skip * i] = transformed[start + skip * i];
@@ -625,10 +732,10 @@ void fmt_impl(
 	}
 }
 
-vector<ll> fmt(
+vector<ll> fmt_recursive(
 	const vector<ll> &function,
-	ll mod = default_number_theoretic_transform_mod,
-	ll primitive_root = default_number_theoretic_transform_primitive_root)
+	ll mod = DEFAULT_NUMBER_THEORETIC_TRANSFORM_MOD,
+	ll primitive_root = DEFAULT_NUMBER_THEORETIC_TRANSFORM_PRIMITIVE_ROOT)
 {
 	auto degree = function.size();
 	if (degree == 0LL)
@@ -664,13 +771,13 @@ vector<ll> fmt(
 		return result;
 	};
 	ll xi = get_mod_power(primitive_root, (mod - 1LL) / degree);
-	fmt_impl(function, transformed, stored, 0LL, 1LL, mod, xi);
+	fmt_recursive_impl(function, transformed, stored, 0LL, 1LL, mod, xi);
 	return transformed;
 }
-vector<ll> inv_fmt(
+vector<ll> inv_fmt_recursive(
 	const vector<ll> &function,
-	ll mod = default_number_theoretic_transform_mod,
-	ll primitive_root = default_number_theoretic_transform_primitive_root)
+	ll mod = DEFAULT_NUMBER_THEORETIC_TRANSFORM_MOD,
+	ll primitive_root = DEFAULT_NUMBER_THEORETIC_TRANSFORM_PRIMITIVE_ROOT)
 {
 	auto get_mod = [&](const ll &n)
 	{
@@ -700,7 +807,7 @@ vector<ll> inv_fmt(
 	};
 
 	auto inverse_primitive_root = get_mod_inverse(primitive_root, mod);
-	vector<ll> transformed = fmt(
+	vector<ll> transformed = fmt_recursive(
 		function, mod, inverse_primitive_root);
 	auto inverse_n = get_mod_inverse(function.size(), mod);
 	for (ull i = 0; i < function.size(); ++i)
@@ -709,6 +816,172 @@ vector<ll> inv_fmt(
 	}
 
 	return transformed;
+}
+
+#include <atcoder/all>
+using rll = atcoder::modint998244353;
+constexpr ll MOD_PRIMITIVE_ROOT = 3LL;
+constexpr ll MOD_INVERSE_PRIMITIVE_ROOT = 332748118LL;
+
+inline ull get_power2_more_than_input(ull input)
+{
+	// val is 0.
+	if (input == 0ULL)
+		return 1ULL;
+	// val is power of 2
+	if (!(input & (input - 1)))
+		return input;
+
+	ull highest_one_bit = input;
+	while ((highest_one_bit & (highest_one_bit - 1LL)) != 0)
+		highest_one_bit = highest_one_bit & (highest_one_bit - 1LL);
+	ull power2 = highest_one_bit << 1LL;
+	return power2;
+}
+
+inline ull get_value_more_than_log_2_input(ull input)
+{
+	auto get_power2 = [](ull input)
+	{
+		// val is 0.
+		if (input == 0ULL)
+			return 1ULL;
+		// val is power of 2
+		if (!(input & (input - 1)))
+			return input;
+
+		ull highest_one_bit = input;
+		while ((highest_one_bit & (highest_one_bit - 1LL)) != 0)
+			highest_one_bit = highest_one_bit & (highest_one_bit - 1LL);
+		ull power2 = highest_one_bit << 1LL;
+		return power2;
+	};
+
+	auto power2 = get_power2(input);
+	ull value = 0ULL;
+	while (power2 > 1ULL)
+	{
+		power2 >>= 1LL;
+		++value;
+	}
+	return value;
+}
+
+// Fast Modulo Transform
+vector<rll> fmt_impl(const vector<rll> &function, const ll primitive_root)
+{
+	ll degree = function.size();
+	if (degree == 0LL)
+		throw runtime_error("配列の要素数は 1 以上である必要があります。");
+	if ((degree & (degree - 1LL)) != 0LL)
+		throw runtime_error("配列の要素数は 2 のべき乗である必要があります。");
+
+	auto get_power2 = [&](rll base, ull exponential)
+	{
+		rll result = 1;
+		while (exponential >= 1)
+		{
+			if (exponential & 1)
+			{
+				result *= base;
+			}
+			base *= base;
+			exponential >>= 1;
+		}
+
+		return result;
+	};
+	rll xi = get_power2(rll(primitive_root), (rll::mod() - 1LL) / degree);
+
+	vector<rll> transformed(degree, 0);
+	vector<rll> stored(degree, 0);
+
+	for (ll i = 0; i < degree; ++i)
+		transformed[i] = function[i];
+	if (degree == 1LL)
+	{
+		return transformed;
+	}
+
+	ll log_2_deg = 0LL;
+	for (ll i = 1; i < degree; i <<= 1LL)
+		++log_2_deg;
+
+	vector<rll> mod_xi_2s(log_2_deg);
+	vector<ll> power_2s(log_2_deg);
+	mod_xi_2s[0] = xi, power_2s[0] = 1LL;
+	for (ll i = 1; i < log_2_deg; ++i)
+		mod_xi_2s[i] = mod_xi_2s[i - 1LL] * mod_xi_2s[i - 1LL], power_2s[i] = 1LL << i;
+
+	for (ll e = 0; e < log_2_deg; ++e)
+	{
+		auto mod_xi = mod_xi_2s[log_2_deg - e - 1LL];
+		auto skip = power_2s[log_2_deg - e - 1LL];
+		for (ll i = 0; i < degree; ++i)
+			stored[i] = transformed[i];
+
+		rll power_of_xi = 1;
+		for (ll i = 0; i < (degree / skip); ++i)
+		{
+			for (ll start = 0; start < skip; ++start)
+			{
+				auto idx = start + skip * i;
+				auto res_i = i % (degree / skip / 2LL);
+
+				auto stored_idx = start + skip * res_i * 2LL;
+				transformed[idx] = stored[stored_idx] + stored[stored_idx + skip] * power_of_xi;
+			}
+			power_of_xi *= mod_xi;
+		}
+	}
+	return transformed;
+}
+
+vector<rll> fmt(const vector<rll> &function)
+{
+	vector<rll> transformed = fmt_impl(function, MOD_PRIMITIVE_ROOT);
+	return transformed;
+}
+
+vector<rll> inv_fmt(const vector<rll> &function)
+{
+	vector<rll> transformed = fmt_impl(function, MOD_INVERSE_PRIMITIVE_ROOT);
+	auto inverse_n = rll(1) / rll(function.size());
+	for (unsigned int i = 0; i < function.size(); ++i)
+		transformed[i] = transformed[i] * inverse_n;
+
+	return transformed;
+}
+
+vector<ll> fmt_convolution(const vector<ll> &a, const vector<ll> &b)
+{
+	unsigned int coef_num = a.size() + b.size() - 1U;
+	unsigned int fmt_size = get_power2_more_than_input(coef_num);
+
+	vector<rll> rll_a(fmt_size);
+	vector<rll> rll_b(fmt_size);
+	for (unsigned int i = 0; i < a.size(); ++i)
+		rll_a[i] = a[i];
+	for (unsigned int i = 0; i < b.size(); ++i)
+		rll_b[i] = b[i];
+
+	auto fmt_a = fmt(rll_a);
+	auto fmt_b = fmt(rll_b);
+	vector<rll> fmt_ab(fmt_size);
+	for (unsigned int i = 0; i < fmt_size; ++i)
+		fmt_ab[i] = fmt_a[i] * fmt_b[i];
+
+	auto rll_ab = inv_fmt(fmt_ab);
+	vector<ll> ab(coef_num);
+	for (unsigned int i = 0; i < coef_num; ++i)
+		ab[i] = rll_ab[i].val();
+
+	return ab;
+}
+
+vector<ll> my_convolution(const vector<ll> &a, const vector<ll> &b)
+{
+	return fmt_convolution(a, b);
 }
 
 #endif

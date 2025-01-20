@@ -1,8 +1,6 @@
-#ifndef __MODINT_HPP__
-#define __MODINT_HPP__ 0
-
 // include
 //------------------------------------------
+#include <string>
 #include <vector>
 #include <list>
 #include <map>
@@ -13,6 +11,7 @@
 #include <bitset>
 #include <algorithm>
 #include <functional>
+
 #include <numeric>
 #include <utility>
 #include <complex>
@@ -20,23 +19,67 @@
 #include <sstream>
 #include <iostream>
 #include <iomanip>
+
 #include <cstdio>
 #include <cmath>
 #include <cstdlib>
 #include <cctype>
-#include <string>
 #include <cstring>
 #include <ctime>
 
-#include <stdexcept>
-
+// namespace
 using namespace std;
+
+// print
+#define RET(x) return cout << x << endl, 0;
+
+// for loop
+#define REP(i, a, b) for ((i) = (ll)(a); (i) < (ll)(b); (i)++)
+#define REPD(i, a, b) for (ll i = (ll)(a); (i) < (ll)(b); (i)++)
+#define REPI(v, vs) for (auto &v : vs)
+
+// debug
+#ifdef LOCAL_ENV
+#define DUMP(x) cerr << #x << " = " << (x) << endl
+#define DEBUG(x) cerr << #x << " = " << (x) << " (l" << __LINE__ << ")" \
+					  << " " << __FILE__ << endl
+#else
+#define DUMP(x)
+#define DEBUG(x)
+#endif
+
+#define MAX_VALUE 9223372036854787LL
 
 // type alias
 using ll = long long;
 using ull = unsigned long long;
+using comp = complex<double>;
+using llpair = pair<ll, ll>;
+template <class T>
+using vector2d = vector<vector<T>>;
+template <class T>
+using vector3d = vector<vector<vector<T>>>;
+using ll1d = vector<ll>;
+using ll2d = vector2d<ll>;
+using ll3d = vector3d<ll>;
 
-static const ll MOD = 1000000007LL;
+// constant
+static const ll MOD = 998244353LL;
+// static const ll MOD = (1LL << 61LL) - 1LL;
+static const double PI = 3.14159265358979323846;
+
+template <class T, class... Args>
+auto make_multiple_vector(T default_value)
+{
+	return T(default_value);
+}
+
+template <class T, class... Args>
+auto make_multiple_vector(T default_value, ull size, Args... args)
+{
+	using value_type = std::decay_t<decltype(make_multiple_vector<T>(default_value, args...))>;
+	return vector<value_type>(size, make_multiple_vector<T>(default_value, args...));
+}
 
 ll getModValue(const ll &n, ll mod)
 {
@@ -207,5 +250,117 @@ vector<rll> get_exclamations(ull n)
 
 	return exclamations;
 }
+using pair1d = vector<llpair>;
+using rll2d = vector2d<rll>;
+ll N, H, W;
+pair1d ABs;
 
-#endif
+vector<vector<ll>> compute_permutations(ll n)
+{
+	vector<ll> nums(n);
+	ll permutation_count = 1LL;
+	for (ll i = 0; i < n; ++i)
+	{
+		nums[i] = i;
+		permutation_count *= n + 1LL;
+	}
+
+	vector<vector<ll>> permutations;
+	permutations.reserve(permutation_count);
+	do
+	{
+		permutations.push_back(nums);
+	} while (next_permutation(nums.begin(), nums.end()));
+
+	return permutations;
+}
+
+bool can_allocate(vector<ll> permutation, ll bit)
+{
+	ll i = 0;
+	auto is_allocated = make_multiple_vector(false, H, W);
+
+	REPD(j, 0, H)
+	REPD(k, 0, W)
+	{
+		if (is_allocated[j][k])
+		{
+			continue;
+		}
+
+		if (i >= N)
+		{
+			break;
+		}
+		auto [a, b] = ABs[permutation[i]];
+		if ((bit & (1LL << i)) == 0LL)
+		{
+			auto tmp = a;
+			a = b;
+			b = tmp;
+		}
+		++i;
+
+		REPD(l, 0, a)
+		REPD(m, 0, b)
+		{
+			if (j + l >= H || k + m >= W)
+			{
+				return false;
+			}
+			if (is_allocated[j + l][k + m])
+			{
+				return false;
+			}
+			is_allocated[j + l][k + m] = true;
+		}
+	}
+	REPD(j, 0, H)
+	REPD(k, 0, W)
+	{
+		if (!is_allocated[j][k])
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+int solve()
+{
+	cin >> N >> H >> W;
+	ll a, b;
+	REPD(i, 0, N)
+	cin >> a >> b, ABs.emplace_back(a, b);
+
+	auto permutations = compute_permutations(N);
+	REPI(permutation, permutations)
+	REPD(bit, 0, 1LL << N)
+	{
+		if (can_allocate(permutation, bit))
+			RET("Yes");
+	}
+
+	RET("No");
+
+	return 0;
+}
+
+// main function
+int main()
+{
+	cin.tie(0);
+	ios::sync_with_stdio(false);
+
+	solve();
+
+	// ll t;
+	// cin >> t;
+	// REPD(i, 0, t)
+	// {
+	// 	solve();
+	// }
+
+	return 0;
+}

@@ -226,6 +226,36 @@ private:
 	vector<bool> _answers;
 };
 
+// 頂点点の最短距離を返します。
+// パス自体が存在しない場合は -1 を返します。
+vector<vector<long long>> floyd_warshall(const Graph<long long> &graph)
+{
+	using Length = long long;
+
+	// アルゴリズム本体
+	unsigned long long N = graph.vertex_count;
+	vector<vector<Length>> dists(N, vector<Length>(N, 1LL << 60));
+	for (unsigned long long i = 0; i < N; ++i)
+	{
+		dists[i][i] = 0LL;
+	}
+
+	for (unsigned long long i = 0; i < graph.edges.size(); ++i)
+	{
+		auto [from, to, info] = graph.edges[i];
+		dists[from][to] = min(dists[from][to], info);
+	}
+
+	for (unsigned long long k = 0; k < N; ++k)
+		for (unsigned long long i = 0; i < N; ++i)
+			for (unsigned long long j = 0; j < N; ++j)
+			{
+				dists[i][j] = min(dists[i][j], dists[i][k] + dists[k][j]);
+			}
+
+	return dists;
+}
+
 // 始点 s から各点への最短距離を返します。
 // パス自体が存在しない場合は -1 を返します。
 // 長さが負となる経路が存在しない場合を想定しており、負経路が存在するかは別の方法で検出する必要があります。

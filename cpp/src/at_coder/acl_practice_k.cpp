@@ -1,4 +1,4 @@
-//include
+// include
 //------------------------------------------
 #include <string>
 #include <vector>
@@ -30,33 +30,6 @@
 // namespace
 using namespace std;
 
-// type alias
-using ll = long long;
-using ull = unsigned long long;
-using comp = complex<double>;
-
-// constant
-// static const ll MOD = 1000000007LL;
-static const ll MOD = 998244353LL;
-// static const ll MOD = (1LL << 61LL) - 1LL;
-static const double PI = 3.14159265358979323846;
-
-// conversion
-inline ll toint(string s)
-{
-	ll v;
-	istringstream sin(s);
-	sin >> v;
-	return v;
-}
-template <class t>
-inline string tostring(t x)
-{
-	ostringstream sout;
-	sout << x;
-	return sout.str();
-}
-
 // print
 #define RET(x) return cout << x << endl, 0;
 
@@ -65,7 +38,7 @@ inline string tostring(t x)
 #define REPD(i, a, b) for (ll i = (ll)(a); (i) < (ll)(b); (i)++)
 #define REPI(v, vs) for (auto &v : vs)
 
-//debug
+// debug
 #ifdef LOCAL_ENV
 #define DUMP(x) cerr << #x << " = " << (x) << endl
 #define DEBUG(x) cerr << #x << " = " << (x) << " (l" << __LINE__ << ")" \
@@ -75,7 +48,25 @@ inline string tostring(t x)
 #define DEBUG(x)
 #endif
 
-#define MAX_VALUE 9223372036854775807LL
+#define MAX_VALUE 9223372036854787LL
+
+// type alias
+using ll = long long;
+using ull = unsigned long long;
+using comp = complex<double>;
+using llpair = pair<ll, ll>;
+template <class T>
+using vector2d = vector<vector<T>>;
+template <class T>
+using vector3d = vector<vector<vector<T>>>;
+using ll1d = vector<ll>;
+using ll2d = vector2d<ll>;
+using ll3d = vector3d<ll>;
+
+// constant
+static const ll MOD = 998244353LL;
+// static const ll MOD = (1LL << 61LL) - 1LL;
+static const double PI = 3.14159265358979323846;
 
 template <class T, class... Args>
 auto make_multiple_vector(T default_value)
@@ -113,6 +104,23 @@ private:
 		data_[k] = op_im_.Execute(data_[k], lazy_[k]);
 		lazy_[k] = op_mm_.default_value;
 	}
+	void _lazy_propagete_on_parent_nodes(ll k)
+	{
+		stack<ll> pointer_stack;
+		pointer_stack.emplace(k);
+		while (k > 0)
+		{
+			k = (k - 1) / 2;
+			pointer_stack.emplace(k);
+		}
+
+		while (!pointer_stack.empty())
+		{
+			auto idx = pointer_stack.top();
+			pointer_stack.pop();
+			_lazy_propagate(idx);
+		}
+	}
 
 	Integer _query(ll start, ll end, ll searchStart, ll searchEnd, ll node)
 	{
@@ -129,16 +137,18 @@ private:
 
 	void _update(ll start, ll end, Monoid value, ll searchStart, ll searchEnd, ll node)
 	{
-		_lazy_propagate(node);
 		if (start <= searchStart && searchEnd <= end)
 		{
 			lazy_[node] = op_mm_.Execute(lazy_[node], value);
-			_lazy_propagate(node);
 		}
 		else if (searchStart < end && start < searchEnd)
 		{
+			_lazy_propagate(node);
 			_update(start, end, value, searchStart, (searchStart + searchEnd) / 2, node * 2 + 1);
 			_update(start, end, value, (searchStart + searchEnd) / 2, searchEnd, node * 2 + 2);
+
+			_lazy_propagate(node * 2 + 1);
+			_lazy_propagate(node * 2 + 2);
 			data_[node] = op_ii_.Execute(data_[node * 2 + 1], data_[node * 2 + 2]);
 		}
 	}
@@ -159,8 +169,8 @@ public:
 			throw invalid_argument("Start should be non-negative.");
 		if (maxSize_ < end)
 			throw invalid_argument("End should be less than or equal to maxSize.");
-		if (start >= end)
-			throw invalid_argument("End should be more than start.");
+		if (start > end)
+			throw invalid_argument("End should be more than or equal to start.");
 
 		return _update(start, end, value, 0, maxSize_, 0);
 	}
@@ -172,10 +182,14 @@ public:
 			throw invalid_argument("Index should be less than maxSize.");
 		}
 		index += maxSize_ - 1;
+		_lazy_propagete_on_parent_nodes(index);
+
 		data_[index] = value;
 		while (index > 0)
 		{
 			index = (index - 1) / 2;
+			_lazy_propagate(2 * index + 1);
+			_lazy_propagate(2 * index + 2);
 			data_[index] = op_ii_.Execute(data_[2 * index + 1], data_[index * 2 + 2]);
 		}
 	}
@@ -186,13 +200,12 @@ public:
 			throw invalid_argument("Start should be non-negative.");
 		if (maxSize_ < end)
 			throw invalid_argument("End should be less than or equal to maxSize.");
-		if (start >= end)
-			throw invalid_argument("End should be more than start.");
+		if (start > end)
+			throw invalid_argument("End should be more than or equal to start.");
 
 		return _query(start, end, 0, maxSize_, 0);
 	}
 };
-
 using range_sum = pair<ll, ll>;
 using affine_op = pair<ll, ll>;
 
@@ -271,16 +284,20 @@ int solve()
 	return 0;
 }
 
-//main function
+// main function
 int main()
 {
 	cin.tie(0);
 	ios::sync_with_stdio(false);
 
 	solve();
+
 	// ll t;
 	// cin >> t;
-	// REPD(i, 0, t) solve();
+	// REPD(i, 0, t)
+	// {
+	// 	solve();
+	// }
 
 	return 0;
 }

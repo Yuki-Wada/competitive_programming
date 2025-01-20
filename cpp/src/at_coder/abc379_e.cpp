@@ -15,6 +15,7 @@
 #include <numeric>
 #include <utility>
 #include <complex>
+#include <random>
 
 #include <sstream>
 #include <iostream>
@@ -29,32 +30,6 @@
 
 // namespace
 using namespace std;
-
-// type alias
-using ll = long long;
-using ull = unsigned long long;
-using comp = complex<double>;
-
-// constant
-static const ll MOD = 998244353LL;
-// static const ll MOD = (1LL << 61LL) - 1LL;
-static const double PI = 3.14159265358979323846;
-
-// conversion
-inline ll toint(string s)
-{
-	ll v;
-	istringstream sin(s);
-	sin >> v;
-	return v;
-}
-template <class t>
-inline string tostring(t x)
-{
-	ostringstream sout;
-	sout << x;
-	return sout.str();
-}
 
 // print
 #define RET(x) return cout << x << endl, 0;
@@ -74,7 +49,26 @@ inline string tostring(t x)
 #define DEBUG(x)
 #endif
 
-#define MAX_VALUE 9223372036854787LL
+#define MAX_VALUE 9223372036854775807LL
+
+// type alias
+using ll = long long;
+using ull = unsigned long long;
+using comp = complex<double>;
+using llpair = pair<ll, ll>;
+template <class T>
+using vector2d = vector<vector<T>>;
+template <class T>
+using vector3d = vector<vector<vector<T>>>;
+using ll1d = vector<ll>;
+using ll2d = vector2d<ll>;
+using ll3d = vector3d<ll>;
+using pair1d = vector<llpair>;
+using pair2d = vector2d<llpair>;
+
+// constant
+static const ll MOD = 998244353LL;
+static const double PI = 3.14159265358979323846;
 
 template <class T, class... Args>
 auto make_multiple_vector(T default_value)
@@ -89,43 +83,45 @@ auto make_multiple_vector(T default_value, ull size, Args... args)
 	return vector<value_type>(size, make_multiple_vector<T>(default_value, args...));
 }
 
-ll seq_query(ll start, ll end, ll searchStart, ll searchEnd, ll n)
-{
-	ll res = 0LL;
-
-	if (end <= searchStart || searchEnd <= start)
-	{
-		return 0LL;
-	}
-
-	if (start <= searchStart && searchEnd <= end)
-	{
-		cout << "? " << n << " " << (searchStart >> n) << endl;
-		cin >> res;
-		res %= 100LL;
-		return res;
-	}
-
-	ll mid = (searchStart + searchEnd) / 2LL;
-	res += seq_query(start, end, searchStart, mid, n - 1LL);
-	res += seq_query(start, end, mid, searchEnd, n - 1LL);
-
-	res %= 100LL;
-
-	return res;
-}
+ll N;
+string S;
 
 int solve()
 {
-	ll N, L, R;
-	cin >> N >> L >> R;
-	++R;
+	cin >> N >> S;
+	ll1d coefs(N);
+	ll1d accums(N + 1LL);
+	REPD(i, 0, N)
+	{
+		auto ch = ll(S[i] - '0');
+		coefs[i] = (i + 1LL) * ch;
+	}
+	REPD(i, 0, N)
+	{
+		accums[i + 1LL] = accums[i] + coefs[i];
+	}
+	reverse(accums.begin(), accums.end());
 
-	ll A_length = (1LL << N);
+	ll1d results;
+	results.reserve(N * 2LL);
+	ll incr = 0;
+	REPD(i, 0, N)
+	{
+		incr += accums[i];
+		results.emplace_back(incr % 10LL);
+		incr /= 10LL;
+	}
+	while(incr > 0LL) {
+		results.emplace_back(incr % 10LL);
+		incr /= 10LL;
+	}
 
-	ll res = seq_query(L, R, 0LL, A_length, N);
-
-	cout << "! " << res << endl;
+	reverse(results.begin(), results.end());
+	REPD(i, 0, results.size())
+	{
+		cout << results[i];
+	}
+	cout << endl;
 
 	return 0;
 }
@@ -137,9 +133,13 @@ int main()
 	ios::sync_with_stdio(false);
 
 	solve();
+
 	// ll t;
 	// cin >> t;
-	// REPD(i, 0, t) solve();
+	// REPD(i, 0, t)
+	// {
+	// 	solve();
+	// }
 
 	return 0;
 }
