@@ -883,9 +883,9 @@ vector<rll> fmt_impl(const vector<rll> &function, const ll primitive_root)
 		{
 			if (exponential & 1)
 			{
-				result *= base;
+				result = result * base;
 			}
-			base *= base;
+			base = base * base;
 			exponential >>= 1;
 		}
 
@@ -931,7 +931,7 @@ vector<rll> fmt_impl(const vector<rll> &function, const ll primitive_root)
 				auto stored_idx = start + skip * res_i * 2LL;
 				transformed[idx] = stored[stored_idx] + stored[stored_idx + skip] * power_of_xi;
 			}
-			power_of_xi *= mod_xi;
+			power_of_xi = power_of_xi * mod_xi;
 		}
 	}
 	return transformed;
