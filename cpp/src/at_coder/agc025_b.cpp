@@ -1,8 +1,6 @@
-#ifndef __MODINT_HPP__
-#define __MODINT_HPP__ 0
-
 // include
 //------------------------------------------
+#include <string>
 #include <vector>
 #include <list>
 #include <map>
@@ -13,30 +11,77 @@
 #include <bitset>
 #include <algorithm>
 #include <functional>
+
 #include <numeric>
 #include <utility>
 #include <complex>
+#include <random>
 
 #include <sstream>
 #include <iostream>
 #include <iomanip>
+
 #include <cstdio>
 #include <cmath>
 #include <cstdlib>
 #include <cctype>
-#include <string>
 #include <cstring>
 #include <ctime>
 
-#include <stdexcept>
-
+// namespace
 using namespace std;
+
+// print
+#define RET(x) return cout << x << endl, 0;
+
+// for loop
+#define REP(i, a, b) for ((i) = (ll)(a); (i) < (ll)(b); (i)++)
+#define REPD(i, a, b) for (ll i = (ll)(a); (i) < (ll)(b); (i)++)
+#define REPI(v, vs) for (auto &v : vs)
+
+// debug
+#ifdef LOCAL_ENV
+#define DUMP(x) cerr << #x << " = " << (x) << endl
+#define DEBUG(x) cerr << #x << " = " << (x) << " (l" << __LINE__ << ")" \
+					  << " " << __FILE__ << endl
+#else
+#define DUMP(x)
+#define DEBUG(x)
+#endif
+
+#define MAX_VALUE 9223372036854775807LL
 
 // type alias
 using ll = long long;
 using ull = unsigned long long;
+using comp = complex<double>;
+using llpair = pair<ll, ll>;
+template <class T>
+using vector2d = vector<vector<T>>;
+template <class T>
+using vector3d = vector<vector<vector<T>>>;
+using ll1d = vector<ll>;
+using ll2d = vector2d<ll>;
+using ll3d = vector3d<ll>;
+using pair1d = vector<llpair>;
+using pair2d = vector2d<llpair>;
 
+// constant
 static constexpr ll MOD = 998244353LL;
+static constexpr double PI = 3.14159265358979323846;
+
+template <class T, class... Args>
+auto make_multiple_vector(T default_value)
+{
+	return T(default_value);
+}
+
+template <class T, class... Args>
+auto make_multiple_vector(T default_value, ull size, Args... args)
+{
+	using value_type = std::decay_t<decltype(make_multiple_vector<T>(default_value, args...))>;
+	return vector<value_type>(size, make_multiple_vector<T>(default_value, args...));
+}
 
 ll getModValue(const ll &n, ll mod)
 {
@@ -198,52 +243,82 @@ std::istream &operator>>(std::istream &lhs, ModInt<Mod> &rhs)
 
 using rll = ModInt<MOD>;
 
-vector<rll> get_exclamations(ull n)
+vector<rll> get_exclamations(unsigned int n)
 {
 	vector<rll> exclamations(n + 1ULL);
 	exclamations[0] = 1LL;
-	for (ll i = 1; i <= n; ++i)
+	for (unsigned int i = 1; i <= n; ++i)
 		exclamations[i] = exclamations[i - 1] * i;
 
 	return exclamations;
 }
 
-struct AlgebraicNumber
+// computational complexity: o(log(max(a, b)))
+inline ull get_gcd(ull a, ull b)
 {
-	rll x;
-	rll y;
-
-	AlgebraicNumber() : x(0), y(0) {}
-	AlgebraicNumber(ll x) : x(x) {}
-	AlgebraicNumber(ll x, ll y) : x(x), y(y) {}
-	AlgebraicNumber(rll x) : x(x), y(0) {}
-	AlgebraicNumber(rll x, rll y) : x(x), y(y) {}
-
-	pair<ll, ll> n() const { return {x.val(), y.val()}; }
-};
-
-inline AlgebraicNumber operator+(const AlgebraicNumber &lhs, const AlgebraicNumber &rhs) { return {lhs.x + rhs.x, lhs.y + rhs.y}; }
-inline AlgebraicNumber operator-(const AlgebraicNumber &lhs, const AlgebraicNumber &rhs) { return {lhs.x - rhs.x, lhs.y - rhs.y}; }
-inline AlgebraicNumber operator-(const AlgebraicNumber &obj) { return {-obj.x, -obj.y}; }
-inline AlgebraicNumber operator*(const AlgebraicNumber &lhs, const AlgebraicNumber &rhs) { return {lhs.x * rhs.x + lhs.y * rhs.y * 5LL, lhs.x * rhs.y + lhs.y * rhs.x}; }
-inline AlgebraicNumber operator/(const AlgebraicNumber &lhs, const AlgebraicNumber &rhs)
-{
-	auto x = lhs.x * rhs.x - lhs.y * rhs.y * 5LL;
-	auto y = -lhs.x * rhs.y + lhs.y * rhs.x;
-
-	auto rhs_norm = rhs.x * rhs.x - rhs.y * rhs.y * 5LL;
-	x /= rhs_norm;
-	y /= rhs_norm;
-
-	return {x, y};
+	if (b == 0)
+	{
+		return a;
+	}
+	return get_gcd(b, a % b);
 }
-inline bool operator==(const AlgebraicNumber &lhs, const AlgebraicNumber &rhs)
-{
-	return (lhs.x == rhs.x) && (lhs.y == rhs.y);
-};
-inline bool operator!=(const AlgebraicNumber &lhs, const AlgebraicNumber &rhs)
-{
-	return !(lhs == rhs);
-};
 
-#endif
+ll N, A, B, K;
+
+int solve()
+{
+	cin >> N >> A >> B >> K;
+
+	if ((A + B) * N < K)
+	{
+		cout << 0 << endl;
+		return 0;
+	}
+
+	ll gcd = get_gcd(A, B);
+	if (K % gcd != 0LL)
+	{
+		cout << 0 << endl;
+		return 0;
+	}
+
+	A /= gcd;
+	B /= gcd;
+	K /= gcd;
+
+	vector<rll> excls = get_exclamations(N + 2LL);
+
+	rll res = 0;
+	REPD(ca, 0, N + 1LL)
+	{
+		if ((K - ca * A) % B == 0LL)
+		{
+			auto cb = (K - ca * A) / B;
+			if (cb >= 0LL && cb <= N)
+			{
+				res += excls[N] / excls[ca] / excls[N - ca] * excls[N] / excls[cb] / excls[N - cb];
+			}
+		}
+	}
+	cout << res.n() << endl;
+
+	return 0;
+}
+
+// main function
+int main()
+{
+	cin.tie(0);
+	ios::sync_with_stdio(false);
+
+	solve();
+
+	// ll t;
+	// cin >> t;
+	// REPD(i, 0, t)
+	// {
+	// 	solve();
+	// }
+
+	return 0;
+}

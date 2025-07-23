@@ -1,7 +1,7 @@
 #ifndef __MATRIX_HPP__
 #define __MATRIX_HPP__
 
-//include
+// include
 //------------------------------------------
 #include <vector>
 #include <list>
@@ -37,14 +37,14 @@ using ll = long long;
 using ull = unsigned long long;
 using comp = complex<double>;
 
-static const double PI = 3.14;
-
 template <class Integer, unsigned int row, unsigned int col>
-class Matrix {
+class Matrix
+{
 protected:
 	vector<Integer> values_;
+
 public:
-	Matrix() : values_(row * col) { }
+	Matrix() : values_(row * col) {}
 
 	ull get_row_size() const
 	{
@@ -56,22 +56,22 @@ public:
 		return col;
 	}
 
-	Integer& operator()(ull rowIndex, ull colIndex)
+	Integer &operator()(ull rowIndex, ull colIndex)
 	{
 		return values_[rowIndex * col + colIndex];
 	}
 
-	const Integer& operator()(ull rowIndex, ull colIndex) const
+	const Integer &operator()(ull rowIndex, ull colIndex) const
 	{
 		return values_[rowIndex * col + colIndex];
 	}
 };
 
-template<class Integer, unsigned int row, unsigned int col>
+template <class Integer, unsigned int row, unsigned int col>
 inline Matrix<Integer, row, col> operator+(
-	const Matrix<Integer, row, col>& lhs,
-	const Matrix<Integer, row, col>& rhs
-){
+	const Matrix<Integer, row, col> &lhs,
+	const Matrix<Integer, row, col> &rhs)
+{
 	Matrix<Integer, row, col> res;
 	for (ll i = 0; i < row; ++i)
 		for (ll j = 0; j < col; ++j)
@@ -80,11 +80,11 @@ inline Matrix<Integer, row, col> operator+(
 	return res;
 }
 
-template<class Integer, unsigned int row, unsigned int col>
+template <class Integer, unsigned int row, unsigned int col>
 inline Matrix<Integer, row, col> operator-(
-	const Matrix<Integer, row, col>& lhs,
-	const Matrix<Integer, row, col>& rhs
-){
+	const Matrix<Integer, row, col> &lhs,
+	const Matrix<Integer, row, col> &rhs)
+{
 	Matrix<Integer, row, col> res;
 	for (ll i = 0; i < row; ++i)
 		for (ll j = 0; j < col; ++j)
@@ -93,11 +93,11 @@ inline Matrix<Integer, row, col> operator-(
 	return res;
 }
 
-template<class Integer, unsigned int row, unsigned int mid, unsigned int col>
+template <class Integer, unsigned int row, unsigned int mid, unsigned int col>
 inline Matrix<Integer, row, col> operator*(
-	const Matrix<Integer, row, mid>& lhs,
-	const Matrix<Integer, mid, col>& rhs
-){
+	const Matrix<Integer, row, mid> &lhs,
+	const Matrix<Integer, mid, col> &rhs)
+{
 	Matrix<Integer, row, col> res;
 	for (ll i = 0; i < row; ++i)
 		for (ll j = 0; j < col; ++j)
@@ -107,8 +107,9 @@ inline Matrix<Integer, row, col> operator*(
 	return res;
 }
 
-template<class Integer, unsigned int row, unsigned int col>
-inline Matrix<Integer, row, col> operator*(const Matrix<Integer, row, col>& lhs, Integer a){
+template <class Integer, unsigned int row, unsigned int col>
+inline Matrix<Integer, row, col> operator*(const Matrix<Integer, row, col> &lhs, Integer a)
+{
 	Matrix<Integer, row, col> res;
 	for (ll i = 0; i < row; ++i)
 		for (ll j = 0; j < col; ++j)
@@ -117,8 +118,9 @@ inline Matrix<Integer, row, col> operator*(const Matrix<Integer, row, col>& lhs,
 	return res;
 }
 
-template<class Integer, unsigned int row, unsigned int col>
-inline Matrix<Integer, row, col> operator*(Integer a, const Matrix<Integer, row, col>& rhs){
+template <class Integer, unsigned int row, unsigned int col>
+inline Matrix<Integer, row, col> operator*(Integer a, const Matrix<Integer, row, col> &rhs)
+{
 	Matrix<Integer, row, col> res;
 	for (ll i = 0; i < row; ++i)
 		for (ll j = 0; j < col; ++j)
@@ -128,31 +130,41 @@ inline Matrix<Integer, row, col> operator*(Integer a, const Matrix<Integer, row,
 }
 
 template <class Integer, unsigned int row, unsigned int col>
-std::ostream& operator<<(std::ostream& lhs, const Matrix<Integer, row, col>& rhs)
+std::ostream &operator<<(std::ostream &lhs, const Matrix<Integer, row, col> &rhs)
 {
-	for (ll i = 0; i < rhs.get_row_size(); ++i) {
-		if (i == 0) lhs << "[";
-		else lhs << " ";
+	for (ll i = 0; i < rhs.get_row_size(); ++i)
+	{
+		if (i == 0)
+			lhs << "[";
+		else
+			lhs << " ";
 
 		lhs << "[";
-		for (ll j = 0; j < rhs.get_col_size(); ++j) {
+		for (ll j = 0; j < rhs.get_col_size(); ++j)
+		{
 			lhs << rhs(i, j);
-			if (j + 1 < rhs.get_col_size()) lhs << ", ";
+			if (j + 1 < rhs.get_col_size())
+				lhs << ", ";
 		}
 
-		if (i + 1 < rhs.get_row_size()) lhs << "]," << endl;
-		else lhs << "]]";
+		if (i + 1 < rhs.get_row_size())
+			lhs << "]," << endl;
+		else
+			lhs << "]]";
 	}
 	return lhs;
 }
 
 template <class Integer, unsigned int order>
-class SquareMatrix : public Matrix<Integer, order, order> {
+class SquareMatrix : public Matrix<Integer, order, order>
+{
 public:
 	SquareMatrix() : Matrix<Integer, order, order>() {}
-	SquareMatrix(Matrix<Integer, order, order>&& m) : Matrix<Integer, order, order>(m) {}
-	SquareMatrix(Integer a) : Matrix<Integer, order, order>() {
-		for (unsigned int i = 0; i < order; ++i) (*this)(i, i) = a;
+	SquareMatrix(Matrix<Integer, order, order> &&m) : Matrix<Integer, order, order>(m) {}
+	SquareMatrix(Integer a) : Matrix<Integer, order, order>()
+	{
+		for (unsigned int i = 0; i < order; ++i)
+			(*this)(i, i) = a;
 	}
 
 	ull get_order() const
@@ -163,7 +175,8 @@ public:
 	Integer trace() const
 	{
 		Integer result = 0;
-		for (unsigned int i = 0; i < order; ++i) result = result + (*this)(i, i);
+		for (unsigned int i = 0; i < order; ++i)
+			result = result + (*this)(i, i);
 
 		return result;
 	}

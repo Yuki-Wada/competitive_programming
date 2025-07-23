@@ -133,6 +133,15 @@ inline ull get_gcd(ull a, ull b)
 	return get_gcd(b, a % b);
 }
 
+// computational complexity: o(log(max(a, b)))
+inline pair<ll, ll> get_bezouts_solution(ll a, ll b)
+{
+	if (b == ll(0))
+		return {ll(1) / a, ll(0)};
+	auto sol = get_bezouts_solution(b, a % b);
+	return {sol.second, sol.first - (a / b) * sol.second};
+}
+
 template <class Integer>
 inline Integer get_power(Integer base, ull exponential)
 {
@@ -226,11 +235,11 @@ vector<vector<ll>> enumerate_combination_slow(ll n, ll k)
 	return res;
 }
 
-vector<vector<ll>> enumerate_combination(ll n, ll k)
+vector<vector<ll>> enumerate_combination(const vector<ll> &elems, ll k)
 {
 	struct CombineImpl
 	{
-		static void execute(ll k, ll start, vector<ll> &elems, vector<ll> &comb, vector<vector<ll>> &combs)
+		static void execute(ll k, ll start, const vector<ll> &elems, vector<ll> &comb, vector<vector<ll>> &combs)
 		{
 			if (comb.size() > k)
 			{
@@ -259,12 +268,18 @@ vector<vector<ll>> enumerate_combination(ll n, ll k)
 
 	vector<vector<ll>> combs;
 	vector<ll> comb;
+
+	CombineImpl::execute(k, 0LL, elems, comb, combs);
+	return combs;
+}
+
+vector<vector<ll>> enumerate_combination(ll n, ll k)
+{
 	vector<ll> elems(n);
 	for (ll i = 0; i < n; ++i)
-	{
 		elems[i] = i;
-	}
-	CombineImpl::execute(k, 0LL, elems, comb, combs);
+
+	auto combs = enumerate_combination(elems, k);
 	return combs;
 }
 
@@ -424,10 +439,9 @@ pair<bool, vector<ll>> topological_sort(const vector<vector<ll>> &edges)
 			{
 				status[node] = 1;
 				for (ull i = 0; i < edges[node].size(); ++i)
-				{
 					if (!visit(edges[node][i], edges, status, result))
 						return false;
-				}
+
 				status[node] = 2;
 				result.emplace_back(node);
 			}
@@ -439,10 +453,9 @@ pair<bool, vector<ll>> topological_sort(const vector<vector<ll>> &edges)
 	vector<ll> result;
 	vector<ll> status(edges.size());
 	for (ull i = 0; i < edges.size(); ++i)
-	{
 		if (status[i] == 0 && !DFS::visit(i, edges, status, result))
 			return make_pair(false, vector<ll>());
-	}
+
 	reverse(result.begin(), result.end());
 
 	return make_pair(true, result);

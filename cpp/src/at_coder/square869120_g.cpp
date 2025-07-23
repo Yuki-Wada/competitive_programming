@@ -1,8 +1,6 @@
-#ifndef __POLYNOMIAL_HPP__
-#define __POLYNOMIAL_HPP__ 0
-
 // include
 //------------------------------------------
+#include <string>
 #include <vector>
 #include <list>
 #include <map>
@@ -13,33 +11,123 @@
 #include <bitset>
 #include <algorithm>
 #include <functional>
+
 #include <numeric>
 #include <utility>
 #include <complex>
+#include <random>
 
 #include <sstream>
 #include <iostream>
 #include <iomanip>
+
 #include <cstdio>
 #include <cmath>
 #include <cstdlib>
 #include <cctype>
-#include <string>
 #include <cstring>
 #include <ctime>
 
-#include <stdexcept>
-
+// namespace
 using namespace std;
+
+// print
+#define RET(x) return cout << x << endl, 0;
+
+// for loop
+#define REP(i, a, b) for ((i) = (ll)(a); (i) < (ll)(b); (i)++)
+#define REPD(i, a, b) for (ll i = (ll)(a); (i) < (ll)(b); (i)++)
+#define REPI(v, vs) for (auto &v : vs)
+
+// debug
+#ifdef LOCAL_ENV
+#define DUMP(x) cerr << #x << " = " << (x) << endl
+#define DEBUG(x) cerr << #x << " = " << (x) << " (l" << __LINE__ << ")" \
+					  << " " << __FILE__ << endl
+#else
+#define DUMP(x)
+#define DEBUG(x)
+#endif
+
+#define MAX_VALUE 9223372036854775807LL
 
 // type alias
 using ll = long long;
 using ull = unsigned long long;
+using comp = complex<double>;
+using llpair = pair<ll, ll>;
+template <class T>
+using vector2d = vector<vector<T>>;
+template <class T>
+using vector3d = vector<vector<vector<T>>>;
+using ll1d = vector<ll>;
+using ll2d = vector2d<ll>;
+using ll3d = vector3d<ll>;
+using pair1d = vector<llpair>;
+using pair2d = vector2d<llpair>;
+
+// constant
+static constexpr ll MOD = 998244353LL;
+static constexpr double PI = 3.14159265358979323846;
+
+template <class T, class... Args>
+auto make_multiple_vector(T default_value)
+{
+	return T(default_value);
+}
+
+template <class T, class... Args>
+auto make_multiple_vector(T default_value, ull size, Args... args)
+{
+	using value_type = std::decay_t<decltype(make_multiple_vector<T>(default_value, args...))>;
+	return vector<value_type>(size, make_multiple_vector<T>(default_value, args...));
+}
+
+// temporary
+#include <atcoder/all>
+using namespace atcoder;
+using rll = atcoder::modint998244353;
 
 constexpr ll MOD_PRIMITIVE_ROOT = 3LL;
 constexpr ll MOD_INVERSE_PRIMITIVE_ROOT = 332748118LL;
 
-using rll = atcoder::modint998244353;
+struct AlgebraicNumber
+{
+	rll x;
+	rll y;
+
+	AlgebraicNumber() : x(0), y(0) {}
+	AlgebraicNumber(ll x) : x(x) {}
+	AlgebraicNumber(ll x, ll y) : x(x), y(y) {}
+	AlgebraicNumber(rll x) : x(x), y(0) {}
+	AlgebraicNumber(rll x, rll y) : x(x), y(y) {}
+
+	pair<ll, ll> n() const { return {x.val(), y.val()}; }
+};
+
+inline AlgebraicNumber operator+(const AlgebraicNumber &lhs, const AlgebraicNumber &rhs) { return {lhs.x + rhs.x, lhs.y + rhs.y}; }
+inline AlgebraicNumber operator-(const AlgebraicNumber &lhs, const AlgebraicNumber &rhs) { return {lhs.x - rhs.x, lhs.y - rhs.y}; }
+inline AlgebraicNumber operator-(const AlgebraicNumber &obj) { return {-obj.x, -obj.y}; }
+inline AlgebraicNumber operator*(const AlgebraicNumber &lhs, const AlgebraicNumber &rhs) { return {lhs.x * rhs.x + lhs.y * rhs.y * 5LL, lhs.x * rhs.y + lhs.y * rhs.x}; }
+inline AlgebraicNumber operator/(const AlgebraicNumber &lhs, const AlgebraicNumber &rhs)
+{
+	auto x = lhs.x * rhs.x - lhs.y * rhs.y * 5LL;
+	auto y = -lhs.x * rhs.y + lhs.y * rhs.x;
+
+	auto rhs_norm = rhs.x * rhs.x - rhs.y * rhs.y * 5LL;
+	x /= rhs_norm;
+	y /= rhs_norm;
+
+	return {x, y};
+}
+inline bool operator==(const AlgebraicNumber &lhs, const AlgebraicNumber &rhs)
+{
+	return (lhs.x == rhs.x) && (lhs.y == rhs.y);
+};
+inline bool operator!=(const AlgebraicNumber &lhs, const AlgebraicNumber &rhs)
+{
+	return !(lhs == rhs);
+};
 
 inline ull get_power2_more_than_input(ull input)
 {
@@ -679,4 +767,186 @@ Polynomial<Number> prod(const vector<Polynomial<Number>> &polys)
 	return node_infos[node_idx].polynomial;
 }
 
-#endif
+template <class Integer, unsigned int row, unsigned int col>
+class Matrix
+{
+protected:
+	vector<Integer> values_;
+
+public:
+	Matrix() : values_(row * col) {}
+
+	ull get_row_size() const
+	{
+		return row;
+	}
+
+	ull get_col_size() const
+	{
+		return col;
+	}
+
+	Integer &operator()(ull rowIndex, ull colIndex)
+	{
+		return values_[rowIndex * col + colIndex];
+	}
+
+	const Integer &operator()(ull rowIndex, ull colIndex) const
+	{
+		return values_[rowIndex * col + colIndex];
+	}
+};
+
+template <class Integer, unsigned int row, unsigned int col>
+inline Matrix<Integer, row, col> operator+(
+	const Matrix<Integer, row, col> &lhs,
+	const Matrix<Integer, row, col> &rhs)
+{
+	Matrix<Integer, row, col> res;
+	for (ll i = 0; i < row; ++i)
+		for (ll j = 0; j < col; ++j)
+			res(i, j) = lhs(i, j) + rhs(i, j);
+
+	return res;
+}
+
+template <class Integer, unsigned int row, unsigned int col>
+inline Matrix<Integer, row, col> operator-(
+	const Matrix<Integer, row, col> &lhs,
+	const Matrix<Integer, row, col> &rhs)
+{
+	Matrix<Integer, row, col> res;
+	for (ll i = 0; i < row; ++i)
+		for (ll j = 0; j < col; ++j)
+			res(i, j) = lhs(i, j) - rhs(i, j);
+
+	return res;
+}
+
+template <class Integer, unsigned int row, unsigned int mid, unsigned int col>
+inline Matrix<Integer, row, col> operator*(
+	const Matrix<Integer, row, mid> &lhs,
+	const Matrix<Integer, mid, col> &rhs)
+{
+	Matrix<Integer, row, col> res;
+	for (ll i = 0; i < row; ++i)
+		for (ll j = 0; j < col; ++j)
+			for (ll k = 0; k < mid; ++k)
+				res(i, j) += lhs(i, k) * rhs(k, j);
+
+	return res;
+}
+
+template <class Integer, unsigned int row, unsigned int col>
+inline Matrix<Integer, row, col> operator*(const Matrix<Integer, row, col> &lhs, Integer a)
+{
+	Matrix<Integer, row, col> res;
+	for (ll i = 0; i < row; ++i)
+		for (ll j = 0; j < col; ++j)
+			res(i, j) += lhs(i, j) * a;
+
+	return res;
+}
+
+template <class Integer, unsigned int row, unsigned int col>
+inline Matrix<Integer, row, col> operator*(Integer a, const Matrix<Integer, row, col> &rhs)
+{
+	Matrix<Integer, row, col> res;
+	for (ll i = 0; i < row; ++i)
+		for (ll j = 0; j < col; ++j)
+			res(i, j) += a * rhs(i, j);
+
+	return res;
+}
+template <class Integer>
+inline Integer get_power(Integer base, ull exponential)
+{
+	Integer result = 1;
+	while (exponential >= 1)
+	{
+		if (exponential & 1)
+		{
+			result = result * base;
+		}
+		base = base * base;
+		exponential >>= 1;
+	}
+
+	return result;
+}
+
+template <>
+inline Matrix<rll, 2, 2> get_power(Matrix<rll, 2, 2> base, ull exponential)
+{
+	Matrix<rll, 2, 2> result;
+	result(0, 0) = 1, result(1, 1) = 1;
+
+	while (exponential >= 1)
+	{
+		if (exponential & 1)
+		{
+			result = result * base;
+		}
+		base = base * base;
+		exponential >>= 1;
+	}
+
+	return result;
+}
+
+ll N, M;
+
+int solve()
+{
+	cin >> N >> M;
+	--M;
+
+	auto alpha = AlgebraicNumber(3, 1) / AlgebraicNumber(2);
+	auto beta = AlgebraicNumber(3, -1) / AlgebraicNumber(2);
+	auto c1 = ((get_power(beta, N - 1LL) - get_power(alpha, N - 1LL)) / get_power(alpha * beta, N - 1LL) / (alpha - beta)).x;
+	auto c2 = ((-get_power(beta, N) + get_power(alpha, N)) / get_power(alpha * beta, N - 1LL) / (alpha - beta)).x;
+
+	auto poly = Polynomial<rll>::zero_polynomial(N + 1LL);
+	poly[N] += -c1;
+	poly[N - 1LL] += -c2;
+	poly[0] += 1;
+
+	Polynomial<rll> q({rll(-1LL), rll(3LL), rll(-1LL)});
+	auto b = poly / q;
+	c2 = c1 + c2, c1 = -c1;
+
+	rll res = 0;
+	Matrix<rll, 2, 2> mat;
+	mat(0, 0) = 1, mat(0, 1) = 1, mat(1, 0) = 1, mat(1, 1) = 0;
+	auto matm = get_power(mat, M);
+	res += c2 * matm(0, 0) + c1 * matm(1, 0);
+
+	rll coef = 1;
+	REPD(i, 0, N - 1LL)
+	{
+		auto c = b[N - 2LL - i];
+		res += c * coef;
+		coef *= rll(M + i + 1LL) / rll(i + 1LL);
+	}
+	cout << res.val() << endl;
+
+	return 0;
+}
+
+// main function
+int main()
+{
+	cin.tie(0);
+	ios::sync_with_stdio(false);
+
+	solve();
+
+	// ll t;
+	// cin >> t;
+	// REPD(i, 0, t)
+	// {
+	// 	solve();
+	// }
+
+	return 0;
+}

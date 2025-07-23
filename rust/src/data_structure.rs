@@ -6,45 +6,57 @@ struct UnionFind {
     size: Vec<i32>,
 }
 
+/// Union-Find (Disjoint Set Union) structure
+struct UnionFind {
+    parent: Vec<usize>,
+    rank: Vec<usize>,
+    set_size: Vec<usize>,
+}
+
 impl UnionFind {
+    /// Create a new forest of `n` single-element sets
     fn new(n: usize) -> Self {
         Self {
-            n: n,
-            size: vec![-1; n],
+            parent: (0..n).collect(),
+            rank: vec![0; n],
+            set_size: vec![1; n],
         }
     }
-    fn root(&mut self, x: usize) -> usize {
-        if self.size[x] < 0 {
+
+    /// Find the root of `x` (with path compression)
+    fn find(&mut self, x: usize) -> usize {
+        if self.parent[x] == x {
             x
         } else {
-            self.size[x] = self.root(self.size[x] as usize) as i32;
-            self.size[x] as usize
+            let root = self.find(self.parent[x]);
+            self.parent[x] = root;
+            root
         }
     }
-    fn merge(&mut self, x: usize, y: usize) -> bool {
-        let x = self.root(x);
-        let y = self.root(y);
+
+    /// Merge the sets containing `x` and `y`
+    fn unite(&mut self, mut x: usize, mut y: usize) {
+        x = self.find(x);
+        y = self.find(y);
         if x == y {
-            return false;
+            return;
         }
-        if -self.size[x] < -self.size[y] {
-            self.size[y] += self.size[x];
-            self.size[x] = y as i32;
-        } else {
-            self.size[x] += self.size[y];
-            self.size[y] = x as i32;
+        // union by rank
+        if self.rank[x] < self.rank[y] {
+            std::mem::swap(&mut x, &mut y);
         }
-        true
+        self.parent[y] = x;
+        self.set_size[x] += self.set_size[y];
+        if self.rank[x] == self.rank[y] {
+            self.rank[x] += 1;
+        }
     }
-    fn is_merged(&mut self, x: usize, y: usize) -> bool {
-        self.root(x) == self.root(y)
-    }
-    fn is_root(&mut self, x: usize) -> bool {
-        x == self.root(x)
-    }
+
+    #[allow(dead_code)]
+    /// Size of the set containing `x`
     fn size(&mut self, x: usize) -> usize {
-        let x = self.root(x);
-        -self.size[x] as usize
+        let root = self.find(x);
+        self.set_size[root]
     }
 }
 
@@ -114,5 +126,118 @@ where
             r = (r - 1) / 2;
         }
         out
+    }
+}
+
+#[allow(clippy::many_single_char_names)]
+pub struct SegmentTreeLazy<I, M, FII, FIM, FMM>
+where
+    I: Copy,
+    M: Copy + PartialEq,
+    FII: Fn(I, I) -> I + Copy,
+    FIM: Fn(I, M) -> I + Copy,
+    FMM: Fn(M, M) -> M + Copy,
+{
+    size: usize,
+    data: Vec<I>,
+    lazy: Vec<M>,
+    op_ii: FII,
+    op_im: FIM,
+    op_mm: FMM,
+    id_ii: I,
+    id_mm: M,
+}
+
+impl<I, M, FII, FIM, FMM> SegmentTreeLazy<I, M, FII, FIM, FMM>
+where
+    I: Copy,
+    M: Copy + PartialEq,
+    FII: Fn(I, I) -> I + Copy,
+    FIM: Fn(I, M) -> I + Copy,
+    FMM: Fn(M, M) -> M + Copy,
+{
+    pub fn new(max_size: usize, op_ii: FII, id_ii: I, op_im: FIM, op_mm: FMM, id_mm: M) -> Self {
+        let mut size = 1usize;
+        while size < max_size {
+            size <<= 1;
+        }
+        Self {
+            size,
+            data: vec![id_ii; size * 2 - 1],
+            lazy: vec![id_mm; size * 2 - 1],
+            op_ii,
+            op_im,
+            op_mm,
+            id_ii,
+            id_mm,
+        }
+    }
+
+    pub fn size(&self) -> usize {
+        self.size
+    }
+
+    pub fn apply(&mut self, l: usize, r: usize, value: M) {
+        assert!(l < r && r <= self.size);
+        self.apply_internal(l, r, value, 0, 0, self.size);
+    }
+
+    pub fn set(&mut self, mut index: usize, value: I) {
+        assert!(index < self.size);
+        index += self.size - 1;
+        self.data[index] = value;
+        while index > 0 {
+            index = (index - 1) / 2;
+            self.data[index] = (self.op_ii)(self.data[index * 2 + 1], self.data[index * 2 + 2]);
+        }
+    }
+
+    pub fn query(&mut self, l: usize, r: usize) -> I {
+        assert!(l < r && r <= self.size);
+        self.query_internal(l, r, 0, 0, self.size)
+    }
+
+    fn propagate(&mut self, k: usize) {
+        if self.lazy[k] == self.id_mm {
+            return;
+        }
+        if k < self.size - 1 {
+            let lc = 2 * k + 1;
+            let rc = 2 * k + 2;
+            self.lazy[lc] = (self.op_mm)(self.lazy[lc], self.lazy[k]);
+            self.lazy[rc] = (self.op_mm)(self.lazy[rc], self.lazy[k]);
+        }
+        self.data[k] = (self.op_im)(self.data[k], self.lazy[k]);
+        self.lazy[k] = self.id_mm;
+    }
+
+    fn apply_internal(&mut self, l: usize, r: usize, value: M, k: usize, nl: usize, nr: usize) {
+        self.propagate(k);
+        if r <= nl || nr <= l {
+            return;
+        }
+        if l <= nl && nr <= r {
+            self.lazy[k] = (self.op_mm)(self.lazy[k], value);
+            self.propagate(k);
+            return;
+        }
+        let mid = (nl + nr) / 2;
+        self.apply_internal(l, r, value, 2 * k + 1, nl, mid);
+        self.apply_internal(l, r, value, 2 * k + 2, mid, nr);
+        self.data[k] = (self.op_ii)(self.data[2 * k + 1], self.data[2 * k + 2]);
+    }
+
+    fn query_internal(&mut self, l: usize, r: usize, k: usize, nl: usize, nr: usize) -> I {
+        self.propagate(k);
+        if r <= nl || nr <= l {
+            return self.id_ii;
+        }
+        if l <= nl && nr <= r {
+            return self.data[k];
+        }
+        let mid = (nl + nr) / 2;
+        let left = self.query_internal(l, r, 2 * k + 1, nl, mid);
+        let right = self.query_internal(l, r, 2 * k + 2, mid, nr);
+        (self.op_ii)(left, right)
     }
 }

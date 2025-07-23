@@ -305,7 +305,7 @@ private:
 			_query(start, end, (searchStart + searchEnd) / 2, searchEnd, node * 2 + 2));
 	}
 
-	void _update(ll start, ll end, Monoid value, ll searchStart, ll searchEnd, ll node)
+	void _apply(ll start, ll end, Monoid value, ll searchStart, ll searchEnd, ll node)
 	{
 		if (start <= searchStart && searchEnd <= end)
 		{
@@ -314,8 +314,8 @@ private:
 		else if (searchStart < end && start < searchEnd)
 		{
 			_lazy_propagate(node);
-			_update(start, end, value, searchStart, (searchStart + searchEnd) / 2, node * 2 + 1);
-			_update(start, end, value, (searchStart + searchEnd) / 2, searchEnd, node * 2 + 2);
+			_apply(start, end, value, searchStart, (searchStart + searchEnd) / 2, node * 2 + 1);
+			_apply(start, end, value, (searchStart + searchEnd) / 2, searchEnd, node * 2 + 2);
 
 			_lazy_propagate(node * 2 + 1);
 			_lazy_propagate(node * 2 + 2);
@@ -333,7 +333,7 @@ public:
 		lazy_ = vector<Monoid>(ll(maxSize_) * 2 - 1, op_mm_.default_value);
 	}
 
-	void update(ll start, ll end, Monoid value)
+	void apply(ll start, ll end, Monoid value)
 	{
 		if (start < 0)
 			throw invalid_argument("Start should be non-negative.");
@@ -342,10 +342,10 @@ public:
 		if (start > end)
 			throw invalid_argument("End should be more than or equal to start.");
 
-		return _update(start, end, value, 0, maxSize_, 0);
+		return _apply(start, end, value, 0, maxSize_, 0);
 	}
 
-	void update(ll index, Integer value)
+	void set(ll index, Integer value)
 	{
 		if (index >= maxSize_)
 		{
